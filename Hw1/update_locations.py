@@ -11,6 +11,7 @@
 import random, sys, timeit
 
 ###############
+
 # Create a list of 'size' floating point numbers in the range [-bound, bound]
 def generate_random_list(size, bound):
     return [random.uniform(-bound, bound) for i in range(size)]
@@ -46,7 +47,23 @@ t = timeit.timeit(stmt = "update_coords(x, y, z, vx, vy, vz)",
                   number = iters)
 
 chksum = sum(x) + sum(y) + sum(z)
+
+with open("Results.csv", "a+") as file:
+    file.write(str(size) + ", " + str(1000000 * t / (size * iters))+ "\n") 
+
 print("Mean time per coordinate: " + str(1000000 * t / (size * iters)) + "us")
 print("Final checksum is: " + str(chksum))
 
 exit(0)
+
+# sizes = []
+# for i in list(range(8,25)):
+#     sizes.append(2**i)
+# all_iters = []
+
+# for size in sizes:
+#     all_iters.append(int(10000000/size) + 1)
+
+# print(sizes)
+# print(all_iters)
+

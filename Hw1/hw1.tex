@@ -1,0 +1,40 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{color}
+\usepackage[total={6in,8in}]{geometry}
+\usepackage{amsthm}
+
+\usepackage{enumitem}
+\usepackage{centernot}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\sn}{\mathfrak{S}}
+\newcommand{\ve}{\varepsilon}
+\setlength{\parindent}{1cm}
+
+
+\author{Marika Swanberg}
+
+\begin{document}
+Marika Swanberg. Collaborators: None, \today
+\bigskip 
+
+\begin{enumerate}
+\item 
+\begin{enumerate}
+\item The error for $n$ random variables sampled from the same distribution is roughly bounded above by $1/\sqrt{n}$. So, $n$ in this case is the number of runs times the number of objects.
+
+Furthermore, I wanted to bound the error to less than $1\%$. Thus, through simple algebra I devised the following formula to determine the number of runs that I need: 
+\begin{equation}
+runs \geq \frac{10000}{2^x}
+\end{equation}
+\end{enumerate}
+\end{enumerate}
+\end{document}
