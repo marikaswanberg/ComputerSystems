@@ -56,14 +56,5 @@ print("Final checksum is: " + str(chksum))
 
 exit(0)
 
-# sizes = []
-# for i in list(range(8,25)):
-#     sizes.append(2**i)
-# all_iters = []
 
-# for size in sizes:
-#     all_iters.append(int(10000000/size) + 1)
-
-# print(sizes)
-# print(all_iters)
 

@@ -41,6 +41,14 @@ double timeit(double* x, double* y, double* z, double* vx, double* vy, double* v
   return time/(ITERS*SIZE);
 }
 
+double sum(double* list, int size){
+  double sum_total = 0.0;
+  for(int i=0; i<size; i++){
+    sum_total += list[i];
+  }
+  return sum_total;
+}
+
 int main(int argc, char* argv[]){
   if (argc != 3){
     printf("Required arguments: vector_length and iterations_num");
@@ -50,7 +58,7 @@ int main(int argc, char* argv[]){
   const int SIZE = atoi(argv[1]);
   const int ITERS = atoi(argv[2]);
 
-  srand(time(NULL));
+  srand(SIZE);
 
   double* x = generate_random_list(SIZE, 1000);
   double* y = generate_random_list(SIZE, 1000);
@@ -60,7 +68,10 @@ int main(int argc, char* argv[]){
   double* vz = generate_random_list(SIZE, 1);
 
   double average_time = timeit(x,y,z,vx,vy,vz, SIZE, ITERS);
-  printf("%f", average_time);
+
+  double chksum = sum(x,SIZE) + sum(y, SIZE) + sum(z, SIZE);
+  printf("Mean time per coordinate: %fus\n", average_time);
+  printf("Final checksum is: %f\n", chksum);
   
   return 0;
 }
