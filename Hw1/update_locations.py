@@ -48,7 +48,7 @@ t = timeit.timeit(stmt = "update_coords(x, y, z, vx, vy, vz)",
 
 chksum = sum(x) + sum(y) + sum(z)
 
-with open("Results.csv", "a+") as file:
+with open("Python_Results.csv", "a+") as file:
     file.write(str(size) + ", " + str(1000000 * t / (size * iters))+ "\n") 
 
 print("Mean time per coordinate: " + str(1000000 * t / (size * iters)) + "us")

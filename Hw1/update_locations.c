@@ -28,19 +28,24 @@ void update_coords(double* x, double* y, double* z, double* vx, double* vy, doub
 }
 
 
-
+// Returns the average runtime for the update_coords function in microseconds
 double timeit(double* x, double* y, double* z, double* vx, double* vy, double* vz, const int SIZE, const int ITERS){
   struct timespec start, end;
-  double time = 0;
+  long long int time = 0;
+  long long int total_runs = ITERS*SIZE;
   for(int i = 0; i < ITERS; i++){
     clock_gettime(CLOCK_MONOTONIC, &start);
     update_coords(x, y, z, vx, vy, vz, SIZE);
     clock_gettime(CLOCK_MONOTONIC, &end);
     time += (end.tv_nsec - start.tv_nsec);
+    if
   }
-  return time/(ITERS*SIZE);
+
+  printf("%f", time);
+  return time/(total_runs*1000); // we want to convert from nanoseconds to microseconds.
 }
 
+// Returns the sum of the elements in a list
 double sum(double* list, int size){
   double sum_total = 0.0;
   for(int i=0; i<size; i++){
