@@ -13,7 +13,6 @@ double* generate_random_list(const int SIZE, const int BOUND){
   double* random_array = (double*) malloc(SIZE*sizeof(double));
   if (!random_array){
     perror("malloc failed");
-    exit(-1);
   }
   double random_number;
   for(int i = 0; i < SIZE; i++){
@@ -84,7 +83,6 @@ int main(int argc, char* argv[]){
   printf("Mean time per coordinate: %fus\n", average_time);
   printf("Final checksum is: %f\n", chksum);
   
-  // free the memory from the   
   return 0;
 }
 
