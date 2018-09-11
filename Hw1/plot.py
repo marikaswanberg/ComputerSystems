@@ -1,5 +1,5 @@
 y_coords = []
-with open("Python_Results.csv", "r") as file:
+with open("C_Double_Results.csv", "r") as file:
     x  = file.readlines()
 
 for i in range(len(x)):
@@ -10,6 +10,6 @@ for i in range(len(x)):
 
 
 import matplotlib.pyplot as plt
-plt.title("Python Results")
+plt.title("C Double Results")
 plt.plot(list(range(8,25)), y_coords)
 plt.show()

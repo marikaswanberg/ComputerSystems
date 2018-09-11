@@ -6,9 +6,9 @@
 
 // This function generates a random array of floats of length SIZE,
 // within the real interval [-BOUND, BOUND]
-double* generate_random_list(const int SIZE, const int BOUND){
+double* generate_random_list(const long int SIZE, const int BOUND){
   assert(SIZE > 0 && "Size must be positive");
-  assert(BOUND > 0 && "Bound must be poitive");
+  assert(BOUND > 0 && "Bound must be positive");
   // We need to allocate a new array because we need the array past the function call.
   double* random_array = (double*) malloc(SIZE*sizeof(double));
   if (!random_array){
@@ -24,7 +24,7 @@ double* generate_random_list(const int SIZE, const int BOUND){
 }
 
 // Update location by velocity, one time-step
-void update_coords(double* x, double* y, double* z, double* vx, double* vy, double* vz, const int SIZE){
+void update_coords(double* x, double* y, double* z, double* vx, double* vy, double* vz, const long int SIZE){
   for(int i = 0; i < SIZE; i++){
     x[i] += vx[i];
     y[i] += vy[i];
@@ -34,25 +34,25 @@ void update_coords(double* x, double* y, double* z, double* vx, double* vy, doub
 
 
 // Returns the average runtime for the update_coords function in microseconds
-double timeit(double* x, double* y, double* z, double* vx, double* vy, double* vz, const int SIZE, const int ITERS){
+double timeit(double* x, double* y, double* z, double* vx, double* vy, double* vz, const long int SIZE, const long int ITERS){
   struct timespec start, end;
-  long long int time = 0;
-  long long int total_runs = ITERS*SIZE;
-  // time only once (duh)
+  double time = 0.0;
+  clock_gettime(CLOCK_MONOTONIC, &start);
+  
   for(int i = 0; i < ITERS; i++){
-    clock_gettime(CLOCK_MONOTONIC, &start);
     update_coords(x, y, z, vx, vy, vz, SIZE);
-    clock_gettime(CLOCK_MONOTONIC, &end);
     time += (end.tv_nsec - start.tv_nsec);
-    if
+    
   }
-
-  printf("%f", time);
-  return time/(total_runs*1000); // we want to convert from nanoseconds to microseconds.
+  clock_gettime(CLOCK_MONOTONIC, &end);
+  time = (end.tv_sec - start.tv_sec)*1000000.0; // conversion to microseconds
+  time += (end.tv_nsec - start.tv_nsec)*0.001;
+  printf("%f\n", time);
+  return time/(ITERS*SIZE);
 }
 
 // Returns the sum of the elements in a list
-double sum(double* list, int size){
+double sum(double* list, const long int size){
   double sum_total = 0.0;
   for(int i=0; i<size; i++){
     sum_total += list[i];
@@ -66,8 +66,8 @@ int main(int argc, char* argv[]){
     return -1;
   }
 
-  const int SIZE = atoi(argv[1]);
-  const int ITERS = atoi(argv[2]);
+  const long int SIZE = atoi(argv[1]);
+  const long int ITERS = atoi(argv[2]);
 
   srand(SIZE);
 
@@ -84,7 +84,14 @@ int main(int argc, char* argv[]){
   printf("Mean time per coordinate: %fus\n", average_time);
   printf("Final checksum is: %f\n", chksum);
   
-  // free the memory from the   
+  // free the memory from the dynamically-allocated arrays
+  free(x);
+  free(y);
+  free(z);
+  free(vx);
+  free(vy);
+  free(vz);
+  
   return 0;
 }
 
