@@ -90,7 +90,7 @@ int main(int argc, char* argv[]){
 
   int64_t chksum = sum(x,SIZE) + sum(y, SIZE) + sum(z, SIZE);
   printf("Mean time per coordinate: %fus\n", average_time);
-  printf("Final checksum is: %lli\n", chksum);
+  printf("Final checksum is: %li\n", chksum);
   
   // free the memory from the dynamically-allocated arrays
   free(x);
