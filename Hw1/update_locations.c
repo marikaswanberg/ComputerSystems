@@ -5,6 +5,8 @@
 #include <errno.h>
 #include "update_locations.h"
 
+// By Marika Swanberg, collaborated with Jillian James
+
 // This function generates a random array of floats of length SIZE,
 // within the real interval [-BOUND, BOUND]
 int64_t* generate_random_list(const long int SIZE, const int BOUND){
