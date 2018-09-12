@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include "update_locations.h"
 
 // This function generates a random array of floats of length SIZE,
 // within the real interval [-BOUND, BOUND]
@@ -87,7 +88,7 @@ int main(int argc, char* argv[]){
 
   int64_t chksum = sum(x,SIZE) + sum(y, SIZE) + sum(z, SIZE);
   printf("Mean time per coordinate: %fus\n", average_time);
-  printf("Final checksum is: %li\n", chksum);
+  printf("Final checksum is: %lli\n", chksum);
   
   // free the memory from the dynamically-allocated arrays
   free(x);
