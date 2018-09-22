@@ -41,7 +41,9 @@ double random_access(int* buffer, int* rand_locations, const int iters){
 		x = buffer[rand_locations[i]];
 	}
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	x+=1;
+	x+=1; // we needed to 'use' the variable x
+
+	// don't forget to take the average
 	return std::chrono::duration_cast<std::chrono::microseconds>(end-start).count(); 	//convert to nanoseconds
 }
 
@@ -57,8 +59,10 @@ int main(int argc, char* argv[]){
 
 	srand(time(NULL)); // set the seed
 
-	const int iters = atoi(argv[1]);
-	const int size = atoi(argv[2]);
+	
+	const int size = atoi(argv[1]);
+	const int iters = atoi(argv[2]);
+
 
 	int* buffer;
 	int* rand_locations;
@@ -66,7 +70,7 @@ int main(int argc, char* argv[]){
 	buffer = make_buffer(size);
 	rand_locations = make_rand_array(size, iters);
 	double time = random_access(buffer, rand_locations, iters);
-	std::cout << std::to_string(size) + " ," << std::to_string(time) << std::endl;
+	std::cout << std::to_string(size) + ", " << std::to_string(time) << std::endl;
 	return 0;
 
 	}
