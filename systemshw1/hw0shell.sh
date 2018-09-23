@@ -1,0 +1,17 @@
+./buffer 1024 655360 >> hw0data.csv &&
+./buffer 2048 327680 >> hw0data.csv &&
+./buffer 4096 163840 >> hw0data.csv &&
+./buffer 8192 81920 >> hw0data.csv &&
+./buffer 16384 40960 >> hw0data.csv &&
+./buffer 32768 20480 >> hw0data.csv &&
+./buffer 65536 10240 >> hw0data.csv &&
+./buffer 131072 5120 >> hw0data.csv &&
+./buffer 262144 2560 >> hw0data.csv &&
+./buffer 524288 1280 >> hw0data.csv &&
+./buffer 1048576 640 >> hw0data.csv &&
+./buffer 2097152 320 >> hw0data.csv &&
+./buffer 4194304 160 >> hw0data.csv &&
+./buffer 8388608 80 >> hw0data.csv &&
+./buffer 16777216 40 >> hw0data.csv &&
+./buffer 33554432 20 >> hw0data.csv &&
+./buffer 67108864 10 >> hw0data.csv &&
