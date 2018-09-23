@@ -7,6 +7,7 @@ put a description here
 #include <fstream>
 #include <iostream>
 #include <chrono>
+#include <assert.h>
 
 // This function makes a buffer of size "size."
 int* make_buffer(int size){
@@ -24,7 +25,7 @@ int* make_rand_array(int size, const int iters){
 	for(int i = 0; i < iters; i++){
 		// Note that rand() has a maximum value of ~33,0000, so we expand
 		// rand() to a range that covers the full length of the buffer
-		rand_array[i] = size * (int)(rand()/ RAND_MAX+1);
+		rand_array[i] = (int)(size * (double)rand()/(RAND_MAX));
 	}
 	return rand_array;
 }
@@ -42,9 +43,9 @@ double random_access(int* buffer, int* rand_locations, const int iters){
 	}
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	x+=1; // we needed to 'use' the variable x
-
+	std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end-start);
 	// don't forget to take the average
-	return std::chrono::duration_cast<std::chrono::microseconds>(end-start).count(); 	//convert to nanoseconds
+	return time_span.count()*(1000000000)/iters;
 }
 
 
@@ -52,10 +53,10 @@ double random_access(int* buffer, int* rand_locations, const int iters){
 
 
 int main(int argc, char* argv[]){
-        if(argc < 3){
-                // not enough arguments
-	  exit(-1);
-        }
+    if(argc != 3){
+        assert(0 && "Not enough arguments");
+	  	exit(-1);
+    }
 
 	srand(time(NULL)); // set the seed
 
@@ -70,7 +71,8 @@ int main(int argc, char* argv[]){
 	buffer = make_buffer(size);
 	rand_locations = make_rand_array(size, iters);
 	double time = random_access(buffer, rand_locations, iters);
-	std::cout << std::to_string(size) + ", " << std::to_string(time) << std::endl;
+	//std::cout << "Accesses to buffer size " << std::to_string(size) + " took " << std::to_string(time) << " nanoseconds"<< std::endl;
+	std::cout << std::to_string(size) << ", " << std::to_string(time) << std::endl;
 	return 0;
 
 	}
