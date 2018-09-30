@@ -13,7 +13,7 @@ put a description here
 int* make_buffer(int size){
 	int* buffer = new int[size];
 	for(int i = 0; i < size; i++){
- 		buffer[i] = i;
+ 		buffer[i] = rand();
 	}
 	return buffer;
 }
@@ -29,18 +29,23 @@ int hash(int i, int m){
 double random_access(int* buffer, const int iters, const int size){
 	int x;
 	int hashed;
-	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+	auto start = std::chrono::steady_clock::now();
 	for(int i = 0; i < iters; i++){
 		// We are accessing random locations in the buffer to ensure that
 		// the cache won't prefetch values.
-	        hashed =  ((i*i)%(size+i) + i)%size;
+	    hashed =  ((i*i)%(size+i) + i)%size;
 		x = buffer[hashed];
+		x+=1;
 	}
-	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	x+=1; // we needed to 'use' the variable x
-	std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end-start);
+	auto end = std::chrono::steady_clock::now();
+
+ // we needed to 'use' the variable x
+	//std::chrono::duration <double,std::nano> time_span = std::chrono::duration <double, std::nano> (end-start).count();
 	// don't forget to take the average
-	return time_span.count()*(1000000000)/iters;
+
+	std::cout << "Time_span:" << std::chrono::duration <double, std::nano> (end-start).count() << "\n";
+	//return time_span/iters
+	return 0.0;
 }
 
 
@@ -65,7 +70,8 @@ int main(int argc, char* argv[]){
 	
 	double time = random_access(buffer, iters, size);
 	//std::cout << "Accesses to buffer size " << std::to_string(size) + " took " << std::to_string(time) << " nanoseconds"<< std::endl;
-        std::cout << std::to_string(size) << ", " << std::to_string(time) << std::endl;
+    
+    std::cout << std::to_string(size) << ", " << std::to_string(time) << std::endl;
 
 	delete(buffer);
 	return 0;
