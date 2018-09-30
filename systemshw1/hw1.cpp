@@ -13,7 +13,7 @@ put a description here
 int* make_buffer(int size){
 	int* buffer = new int[size];
 	for(int i = 0; i < size; i++){
- 		buffer[i] = i;
+	  buffer[i] = rand();
 	}
 	return buffer;
 }
