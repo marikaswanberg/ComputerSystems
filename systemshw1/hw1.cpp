@@ -13,33 +13,28 @@ put a description here
 int* make_buffer(int size){
 	int* buffer = new int[size];
 	for(int i = 0; i < size; i++){
-		buffer[i] = i;
+ 		buffer[i] = i;
 	}
 	return buffer;
 }
 
-// This returns an array of size iters of random integers that will be the access locations
-// in the buffer.
-int* make_rand_array(int size, const int iters){
-	int* rand_array = new int [iters]; // dynamically allocate our random accesses
-	for(int i = 0; i < iters; i++){
-		// Note that rand() has a maximum value of ~33,0000, so we expand
-		// rand() to a range that covers the full length of the buffer
-		rand_array[i] = (int)(size * (double)rand()/(RAND_MAX));
-	}
-	return rand_array;
+// Our hash function
+int hash(int i, int m){
+  return ((i*i)%(m+i) + i)%m;
 }
 
 // This times iters number of random accesses to the buffer and returns 
 // the average access time in nanoseconds. Note length of rand_locations 
 // should be equal to iters.
-double random_access(int* buffer, int* rand_locations, const int iters){
+double random_access(int* buffer, const int iters, const int size){
 	int x;
+	int hashed;
 	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 	for(int i = 0; i < iters; i++){
 		// We are accessing random locations in the buffer to ensure that
 		// the cache won't prefetch values.
-		x = buffer[rand_locations[i]];
+	        hashed =  ((i*i)%(size+i) + i)%size;
+		x = buffer[hashed];
 	}
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	x+=1; // we needed to 'use' the variable x
@@ -65,14 +60,14 @@ int main(int argc, char* argv[]){
 	const int iters = atoi(argv[2]);
 
 
-	int* buffer;
-	int* rand_locations;
+	int* buffer =  make_buffer(size);
 
-	buffer = make_buffer(size);
-	rand_locations = make_rand_array(size, iters);
-	double time = random_access(buffer, rand_locations, iters);
+	
+	double time = random_access(buffer, iters, size);
 	//std::cout << "Accesses to buffer size " << std::to_string(size) + " took " << std::to_string(time) << " nanoseconds"<< std::endl;
-	std::cout << std::to_string(size) << ", " << std::to_string(time) << std::endl;
+        std::cout << std::to_string(size) << ", " << std::to_string(time) << std::endl;
+
+	delete(buffer);
 	return 0;
 
 	}
