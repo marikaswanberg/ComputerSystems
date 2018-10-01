@@ -1,3 +1,4 @@
+import statistics 
 def read_coords(filename):
     y_coords = []
     with open(filename, "r") as file:
@@ -30,17 +31,27 @@ def take_average(l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11):
         average.append((l1[i] + l2[i] + l3[i] + l4[i] +l5[i] + l6[i] +l7[i] + l8[i] +l9[i] + l10[i] +l11[i])/11)
     return average
 
-coords = take_average(coords_1, coords_2, coords_3, coords_4, coords_5, coords_6, coords_7, coords_8, coords_9, coords_10, coords_11)
+def take_min(l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11):
+    mins = []
+    for i in range(len(l1)):
+        mins.append(min(l1[i],l2[i], l3[i], l4[i], l5[i], l6[i], l7[i], l8[i], l9[i], l10[i], l11[i]))
+    return mins
 
+avgs = take_average(coords_1, coords_2, coords_3, coords_4, coords_5, coords_6, coords_7, coords_8, coords_9, coords_10, coords_11)
+mins = take_min(coords_1, coords_2, coords_3, coords_4, coords_5, coords_6, coords_7, coords_8, coords_9, coords_10, coords_11)
 import matplotlib.pyplot as plt
 
-xint = list(range(10,30))
 
-plt.xticks(xint)
-plt.title("Access time in nanoseconds vs. buffer size")
+plt.title("Mean Access time in nanoseconds vs. buffer size")
 
-plt.plot(list(range(10,30)), coords)
+x_axis = []
+for i in range(10,30):
+    x_axis.append(2**(i+1)/1000)
 
-plt.xlabel("Object Size Log base 2")
-plt.ylabel("Time in microseconds")
+plt.plot(x_axis, avgs)
+
+#plt.xticks(x_axis)
+
+plt.xlabel("Buffer Size in MB")
+plt.ylabel("Time in nanoseconds")
 plt.show()
