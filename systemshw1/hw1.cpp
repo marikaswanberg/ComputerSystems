@@ -13,39 +13,39 @@ put a description here
 int* make_buffer(int size){
 	int* buffer = new int[size];
 	for(int i = 0; i < size; i++){
- 		buffer[i] = rand();
+ 		buffer[i] = (int)rand();
 	}
 	return buffer;
 }
 
-// Our hash function
-int hash(int i, int m){
-  return ((i*i)%(m+i) + i)%m;
-}
 
-// This times iters number of random accesses to the buffer and returns 
-// the average access time in nanoseconds. Note length of rand_locations 
-// should be equal to iters.
-double random_access(int* buffer, const int iters, const int size){
-	int x;
+// This times iters number of accesses to the buffer and returns 
+// the average access time in nanoseconds. To trick the compiler, we
+// use a hash function to access elements out of order.
+double hash_access(int* buffer, const int64_t iters, const int size){
+
 	int hashed;
+	int x = 0;
+
+
 	auto start = std::chrono::steady_clock::now();
-	for(int i = 0; i < iters; i++){
-		// We are accessing random locations in the buffer to ensure that
+	for(int64_t i = 0; i < iters; i++){
+		// We are accessing hashed locations in the buffer to ensure that
 		// the cache won't prefetch values.
-	    hashed =  ((i*i)%(size+i) + i)%size;
+		hashed = ((i*i)%(size+i) + i)%(size-1);
+		// We need to access the value.
 		x = buffer[hashed];
-		x+=1;
 	}
 	auto end = std::chrono::steady_clock::now();
+	auto diff = (end - start);
 
- // we needed to 'use' the variable x
-	//std::chrono::duration <double,std::nano> time_span = std::chrono::duration <double, std::nano> (end-start).count();
-	// don't forget to take the average
+	//Get time difference in nanoseconds
+	auto time_span = std::chrono::duration <double, std::nano> (diff).count();
+	time_span = time_span/iters;
 
-	std::cout << "Time_span:" << std::chrono::duration <double, std::nano> (end-start).count() << "\n";
-	//return time_span/iters
-	return 0.0;
+	std::cout << std::to_string(size) << ", " << std::to_string(time_span) << std::endl;
+
+	return x;
 }
 
 
@@ -68,10 +68,10 @@ int main(int argc, char* argv[]){
 	int* buffer =  make_buffer(size);
 
 	
-	double time = random_access(buffer, iters, size);
-	//std::cout << "Accesses to buffer size " << std::to_string(size) + " took " << std::to_string(time) << " nanoseconds"<< std::endl;
+	hash_access(buffer, iters, size);
+
     
-    std::cout << std::to_string(size) << ", " << std::to_string(time) << std::endl;
+    
 
 	delete(buffer);
 	return 0;
