@@ -76,12 +76,6 @@ uint8_t hash_access(uint8_t* buffer, const int64_t iters, const int size){
 	return x;
 }
 
-// void printarray(uint8_t* array, const int size) {
-// 	for(int i = 0; i <size; i++){
-// 		uint8_t value = array[i];
-// 		std::cout << std::to_string(value) << ", ";
-// 	}
-// }
 
 
 
@@ -100,7 +94,6 @@ int main(int argc, char* argv[]){
 
 	//Make a buffer (an array) of length "size" and fill it using rand()
 	uint8_t* buffer =  make_buffer(size);
-	//printarray(buffer, size);
 
 	//Access the buffer in an unpredictable manner and measure the latency
 	hash_access(buffer, iters, size);
