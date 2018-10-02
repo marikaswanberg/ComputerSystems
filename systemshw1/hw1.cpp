@@ -32,10 +32,10 @@ Disk 66.3 GB
 
 // This function makes a buffer of size "size". It contains
 // "size" number of random ints between 0 and RAND_MAX
-int* make_buffer(int size){
-	int* buffer = new int[size];	//throws a bad alloc acception if fails.
+uint8_t* make_buffer(int size){
+	uint8_t* buffer = new uint8_t[size];	//throws a bad alloc acception if fails.
 	for(int i = 0; i < size; i++){
- 		buffer[i] = (int)rand();
+ 		buffer[i] = (uint8_t)(rand()%127);
 	}
 	return buffer;
 }
@@ -44,10 +44,10 @@ int* make_buffer(int size){
 // This timing function times iters number of accesses to the buffer and returns 
 // the average access time in nanoseconds. To trick the compiler, we
 // use a hash function to access elements out of order.
-double hash_access(int* buffer, const int64_t iters, const int size){
+uint8_t hash_access(uint8_t* buffer, const int64_t iters, const int size){
 
 	int hashed;
-	int x = 0;
+	uint8_t x = 0;
 
 
 	auto start = std::chrono::steady_clock::now(); //Start clock.
@@ -76,7 +76,12 @@ double hash_access(int* buffer, const int64_t iters, const int size){
 	return x;
 }
 
-
+// void printarray(uint8_t* array, const int size) {
+// 	for(int i = 0; i <size; i++){
+// 		uint8_t value = array[i];
+// 		std::cout << std::to_string(value) << ", ";
+// 	}
+// }
 
 
 
@@ -94,13 +99,14 @@ int main(int argc, char* argv[]){
 
 
 	//Make a buffer (an array) of length "size" and fill it using rand()
-	int* buffer =  make_buffer(size);
+	uint8_t* buffer =  make_buffer(size);
+	//printarray(buffer, size);
 
 	//Access the buffer in an unpredictable manner and measure the latency
 	hash_access(buffer, iters, size);
 
-    //Free up memory.
-    delete(buffer);
+    	//Free up memory.
+    	delete[] buffer;
 
 
 	return 0;
