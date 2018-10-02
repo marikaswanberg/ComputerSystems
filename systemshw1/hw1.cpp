@@ -1,11 +1,28 @@
 
 /*
-This program benchmarks the access time for one access on a buffer
-by doing many repetitions. Based on our results, we recommend doing
-this many times and taking the median access time, as it is the most
-representative of the access time without long interrupts.
+CSCI 389
+Jillian James and Marika Swanberg
+HW 1
 
-By Marika Swanberg and Jillian James
+This program takes two arguments "size" and "iters". It creates a buffer of length "size" and times how long it takes to perform
+"iters" number of accesses to the buffer. In order to measure the latency of memory accesses we needed to foil the compiler so it
+wouldn't prefetch the array values. To do this, we made a hash function to probe the buffer and access the values stored in memory.
+
+To run navigate to the directory containing hw1.cpp and run:
+	g++ -std=c++11 -O3 -Werror -Wall -Wextra -pedantic -o  buffer hw1.cpp
+	./buffer (size) (iters)
+where (size) and (iters) are the desired arguments.
+
+
+
+This program was run with:
+
+OS: Ubuntu 17.10
+Memory: 3.9 GiB
+Processor: Intel Core i5-7267U CPU @3.10GHz
+OS type: 64-bit
+Disk 66.3 GB
+
 */
 #include <random>
 #include <fstream>
@@ -13,11 +30,10 @@ By Marika Swanberg and Jillian James
 #include <chrono>
 #include <assert.h>
 
-// This function makes a buffer of size "size" with random
-// entries to trick the compiler.
+// This function makes a buffer of size "size". It contains
+// "size" number of random ints between 0 and RAND_MAX
 int* make_buffer(int size){
-	// The buffer is deleted in main before exiting.
-	int* buffer = new int[size];
+	int* buffer = new int[size];	//throws a bad alloc acception if fails.
 	for(int i = 0; i < size; i++){
  		buffer[i] = (int)rand();
 	}
@@ -25,7 +41,7 @@ int* make_buffer(int size){
 }
 
 
-// This times iters number of accesses to the buffer and returns 
+// This timing function times iters number of accesses to the buffer and returns 
 // the average access time in nanoseconds. To trick the compiler, we
 // use a hash function to access elements out of order.
 double hash_access(int* buffer, const int64_t iters, const int size){
@@ -34,7 +50,8 @@ double hash_access(int* buffer, const int64_t iters, const int size){
 	int x = 0;
 
 
-	auto start = std::chrono::steady_clock::now();
+	auto start = std::chrono::steady_clock::now(); //Start clock.
+
 	for(int64_t i = 0; i < iters; i++){
 		// We are accessing hashed locations in the buffer to ensure that
 		// the cache won't prefetch values.
@@ -42,15 +59,20 @@ double hash_access(int* buffer, const int64_t iters, const int size){
 		// We need to access the value.
 		x = buffer[hashed];
 	}
-	auto end = std::chrono::steady_clock::now();
-	auto diff = (end - start);
 
-	//Get time difference in nanoseconds
+	auto end = std::chrono::steady_clock::now(); //End clock.
+
+	//Get time difference in nanoseconds.
+	auto diff = (end - start);
 	auto time_span = std::chrono::duration <double, std::nano> (diff).count();
+	
+	//Get average access time.
 	time_span = time_span/iters;
 
+	//Output: size, time_span for the csv files.
 	std::cout << std::to_string(size) << ", " << std::to_string(time_span) << std::endl;
-	// We needed to use x in order to trick the compiler.
+
+	//We need to do something with x to ensure the compiler bothered to do line 38.
 	return x;
 }
 
@@ -69,11 +91,18 @@ int main(int argc, char* argv[]){
 	
 	const int size = atoi(argv[1]);
 	const int iters = atoi(argv[2]);
+
+
+	//Make a buffer (an array) of length "size" and fill it using rand()
 	int* buffer =  make_buffer(size);
+
+	//Access the buffer in an unpredictable manner and measure the latency
 	hash_access(buffer, iters, size);
 
-    // Delete the dynamically-allocated buffer
-	delete(buffer);
+    //Free up memory.
+    delete(buffer);
+
+
 	return 0;
 
 	}
