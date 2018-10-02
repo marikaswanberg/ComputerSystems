@@ -65,16 +65,19 @@ meds_ = take_median(coords_1_, coords_2_, coords_3_, coords_4_, coords_5_, coord
 import matplotlib.pyplot as plt
 
 
-plt.title("Median Access time in nanoseconds vs. buffer size")
+plt.title("Average Access time in nanoseconds vs. buffer size")
 
 x_axis = []
 for i in range(10,30):
     x_axis.append(2**(i)/1024)
 
-plt.plot(x_axis, meds_)
+plt.plot(x_axis, avgs_)
 
 #plt.xticks(x_axis)
 plt.xscale("log", basex=2)
 plt.xlabel("Buffer Size in KB")
 plt.ylabel("Time in nanoseconds")
+plt.axvline(x = 64, color = "r", alpha = 0.3)
+plt.axvline(x = 1028, color = "r", alpha = 0.3)
+plt.axvline(x = 34307, color = "r", alpha = 0.3)
 plt.show()
