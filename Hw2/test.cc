@@ -54,9 +54,10 @@ test_get_inCache(){
   Cache::index_type size;
   int value = 6;
   mycache.set("hello", &value, sizeof(value));
-  //Cache::val_type val = mycache.get("hello", size); // what should get() do in this case?
+  Cache::val_type val = mycache.get("hello", size); don't know how to use val?
   assert(size == sizeof(value));
   // how to test that it's the right value?
+  assert(val);
 }
 
 // Make sure the get function doesn't return anything when
@@ -66,7 +67,7 @@ void
 test_get_notInCache(){
   Cache mycache(10);
   Cache::index_type size = 0;
-  Cache::val_type val = mycache.get("hello", size);
+  Cache::val_type val = mycache.get("hello", size); //what should get return in this case?
   assert(size == 0);
   assert(val == nullptr); //???? what should this be
 }
