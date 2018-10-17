@@ -1,6 +1,27 @@
-
+/*
+This file tests our Cache. Do I really need to explain?
+ */
 #include "cache.hh"
 #include <iostream>
+#include <assert.h>
+
+// Make sure an empty cache has zero space used.
+void
+test_capacity_empty(){
+  Cache mycache(10);
+  assert(mycache.space_used == 0);
+}
+
+// Make sure capacity increases with set
+void
+test_capacity_dynamic(){
+  Cache mycache(10);
+  int value = 6;
+  char buf[100];
+  mycache.set("hello", &value, sizeof(char));
+  Cache::index_type size = mycache.space_used;
+}
+
 
 
 int main(){
