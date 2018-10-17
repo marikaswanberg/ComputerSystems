@@ -54,7 +54,7 @@ test_get_inCache(){
   Cache::index_type size;
   int value = 6;
   mycache.set("hello", &value, sizeof(value));
-  Cache::val_type val = mycache.get("hello", size); don't know how to use val?
+  Cache::val_type val = mycache.get("hello", size); //don't know how to use val?
   assert(size == sizeof(value));
   // how to test that it's the right value?
   assert(val);
