@@ -36,12 +36,22 @@ public:
 
 	}
 	~Impl(){
-		//unorderedmap_.clear();
+		auto it = unorderedmap_.begin();
+		while (it != unorderedmap_.end()) {
+			delete[] static_cast<const char*>(std::get<0>(it->second));
+			it = unorderedmap_.erase(it);
+		}
 	}
 
-
 	void set(key_type key, val_type val, index_type size){
-		val_type copy = new val_type[size];
+		// First check if key already has a value in the cache. 
+		// Delete old tuple if necessary
+		index_type tmp = 1;
+		if (get(key, tmp) != nullptr || tmp != 0) {
+			del(key);
+		}
+		// Set the new value
+		val_type copy = new char[size];
 		std::memcpy((void*)copy, val, size);
 		std::tuple<val_type, index_type, index_type> entry = std::make_tuple((void*)copy, size, newest_);
 		if ((memused_ + size) > maxmem_) {
@@ -66,19 +76,18 @@ public:
 		return std::get<0>(entry);
 	}
 	
-
+	// This deletes a (key, tuple) entry from the map
 	void del(key_type key){
 		index_type val_size = 0;
-		val_type val = get(key, val_size);
+		auto val = static_cast<const char*>(get(key, val_size));
 		unorderedmap_.erase(key);
-		free((void*)val);
+		delete[] val;
 		memused_ -= val_size;
 		return;
 	}
 
 	index_type space_used() const{
 		return memused_;
-
 	}
 
 
@@ -92,14 +101,9 @@ public:
 				oldest_age = age;
 				oldest_key = pair.first;
 			}
-	}
-	del(oldest_key);
+		}
+		del(oldest_key);
 	
-}
-
-	void inc_newest(){
-		newest_+= 1;
-
 	}
 
 };
@@ -113,24 +117,31 @@ Cache::Cache(index_type maxmem,
 }
 
 Cache::~Cache(){
-	// we don't need anything here because of pimpl?
+	// we don't need anything here because pimpl is a unique_ptr
 }
 
+// Add a <key, value> pair to the cache.
+// If key already exists, it will overwrite the old value.
+// Both the key and the value are to be deep-copied (not just pointer copied).
+// If maxmem capacity is exceeded, sufficient values will be removed
+// from the cache to accomodate the new value.
 void Cache::set(key_type key, val_type val, index_type size){
-	//set the key/value etc
 	return pImpl_->set(key,val,size);
 }
 
+// Retrieve a pointer to the value associated with key in the cache,
+// or NULL if not found.
+// Sets the actual size of the returned value (in bytes) in val_size
 Cache::val_type Cache::get(key_type key, index_type& val_size) const {
-	//get the key/values
 	return pImpl_->get(key,val_size);
 }
 
+// Delete an object from the cache, if it's still there
 void Cache::del(key_type key){
-	// delete a key/value pair
 	pImpl_->del(key);
 }
 
+// Compute the total amount of memory used up by all cache values (not keys)
 Cache::index_type Cache::space_used() const {
 	return pImpl_->space_used();
 }
