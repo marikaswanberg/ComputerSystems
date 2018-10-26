@@ -68,8 +68,6 @@ test_get_inCache(){
   mycache.set("hello", &value, sizeof(value));
   mycache.get("hello", size);
   assert(size == sizeof(value));
-
-  // how to test that it's the right value?
 }
 
 // Make sure the get function doesn't return anything when
@@ -112,7 +110,7 @@ test_get_evicted(){
   mycache.set("test4", &value3, sizeof(int));
   Cache::index_type size = 1;
   Cache::val_type val = mycache.get("test", size); // this is the element that will get evicted
-  assert(val == NULL);
+  assert(val == NULL); // test that we can't get the value we just deleted
   assert(size == 0);
   
 }
@@ -181,48 +179,20 @@ test_FIFO(){
   assert(space_used2 == (3*sizeof(int)));
 }
 
-// // Test that we adhere to LRU
-// void 
-// test_LRU(){
-//   std::cout << std::endl;
-//   std::cout << "test_LRU" << std::endl;
-//   Cache mycache(10);
-//   char buf[10];
-//   mycache.set("test", buf, 10);
-//   int value = 6;
-//   mycache.set("test2", &value, sizeof(int));
-//   Cache::index_type space_used1 = mycache.space_used();
-//   // make sure get does affect the eviction order
-//   Cache::index_type size;
-//   mycache.get("test", size);
-//   //overflow cache
-//   int value3 = 4; 
-//   mycache.set("test4", &value3, sizeof(int));
-//   Cache::index_type space_used2 = mycache.space_used();
-//   // try to access value that was deleted
-//   Cache::index_type size2 = 1;
-//   Cache::val_type val2 = mycache.get("test2", size2);
-//   assert(val2 == NULL);
-//   assert(size2 == 0);
-//   // make sure the memory useage is correct
-//   assert(space_used1 == (10 + 2*sizeof(int)));
-//   assert(space_used2 == (10 + 2*sizeof(int)));
-
-// }
 
 
 int main(){
   //test memory management
-	test_space_empty();
-	test_space_dyn_int();
-	test_space_dyn_array();
+  test_space_empty();
+  test_space_dyn_int();
+  test_space_dyn_array();
   test_space_inc();
   test_space_del();
 
   // test set and get functionality
-	test_get_inCache();
-	test_get_notInCache();
-	test_get_deleted();
+  test_get_inCache();
+  test_get_notInCache();
+  test_get_deleted();
   test_get_mod();
   test_get_evicted();
 
