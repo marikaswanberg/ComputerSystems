@@ -213,16 +213,16 @@ test_FIFO(){
 
 int main(){
   //test memory management
-  test_space_empty();
-  test_space_dyn_int();
-  test_space_dyn_array();
+	test_space_empty();
+	test_space_dyn_int();
+	test_space_dyn_array();
   test_space_inc();
   test_space_del();
 
   // test set and get functionality
-  test_get_inCache();
-  test_get_notInCache();
-  test_get_deleted();
+	test_get_inCache();
+	test_get_notInCache();
+	test_get_deleted();
   test_get_mod();
   test_get_evicted();
 
@@ -231,7 +231,7 @@ int main(){
   test_FIFO();
   std::cout << "All tests passed." << std::endl;
 
-  return 0;
+	return 0;
 
 
 }
