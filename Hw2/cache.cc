@@ -54,7 +54,7 @@ public:
 		val_type copy = new char[size];
 		std::memcpy((void*)copy, val, size);
 		std::tuple<val_type, index_type, index_type> entry = std::make_tuple((void*)copy, size, newest_);
-		if ((memused_ + size) > maxmem_) {
+		while ((memused_ + size) > maxmem_) {
 			evictor();
 		}
 		this->unorderedmap_[key] = entry;
