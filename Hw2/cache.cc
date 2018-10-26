@@ -1,5 +1,24 @@
+/*
+Jillian James and Marika Swanberg
+This is the implementation file for cache.hh called cache.cc
+
+Run with the command:
+g++ -Wall -Wextra -Werror -pedantic cache.cc test.cc -o test
+
+On a machine using:
+OS: Ubuntu 17.10
+Memory: 3.9 GiB
+Processor: Intel Core i5-7267U CPU @3.10GHz
+OS Type: 64-bit
+Disk 66.3 GB
+*/
+
+
+
+
 #include "cache.hh"
 #include <cstring>
+#include <iostream>
 #include <unordered_map>
 #include <tuple>
 
@@ -9,15 +28,13 @@ struct Cache::Impl {
 	evictor_type evictor_;
 	hash_func hasher_;
 	index_type memused_;
-	std::unordered_map<std::string, void*> unorderedmap_; 
-
+	index_type newest_;
+	std::unordered_map<std::string, std::tuple<val_type, index_type, index_type>> unorderedmap_;
 public:
 	Impl(index_type maxmem, evictor_type evictor, hash_func hasher) 
-	: maxmem_(maxmem), evictor_(evictor), hasher_(hasher), memused_(0), unorderedmap_(){
+	: maxmem_(maxmem), evictor_(evictor), hasher_(hasher), memused_(0), newest_(0), unorderedmap_(){
 
 	}
-<<<<<<< HEAD:Homework2/cache.cc
-=======
 	~Impl(){
 		auto it = unorderedmap_.begin();
 		while (it != unorderedmap_.end()) {
@@ -25,14 +42,8 @@ public:
 			it = unorderedmap_.erase(it);
 		}
 	}
->>>>>>> 41bf975ac4a113fc76cba35b53405a682efa0949:Hw2/cache.cc
 
 	void set(key_type key, val_type val, index_type size){
-<<<<<<< HEAD:Homework2/cache.cc
-		val_type copy = new val_type[size];
-		if ((memused_ + size) > maxmem_) {
-			//evict
-=======
 		// First check if key already has a value in the cache. 
 		// Delete old tuple if necessary
 		index_type tmp = 1;
@@ -45,33 +56,25 @@ public:
 		std::tuple<val_type, index_type, index_type> entry = std::make_tuple((void*)copy, size, newest_);
 		while ((memused_ + size) > maxmem_) {
 			evictor();
->>>>>>> 41bf975ac4a113fc76cba35b53405a682efa0949:Hw2/cache.cc
 		}
-		std::memcpy((void*)copy, val, size);
-		this->unorderedmap_[key] = (void*)copy;
-		memused_+=size;
+		this->unorderedmap_[key] = entry;
+		memused_+= size;
+		newest_ += 1;
 		return;
 	}
 
 	val_type get(key_type key, index_type& val_size) const {
-	//get the key/value
-		for( auto const& pair: unorderedmap_){
-			if (key == pair.first) {
-				val_type val = unorderedmap_.at(key);
-				val_size = sizeof(val);
-				return val;
-			}
+		std::tuple<val_type, index_type, index_type> entry;
+		try{
+			entry = unorderedmap_.at(key);
+		} catch(const std::out_of_range& oor) {
+			val_size = 0; 	// set val_size to 0 if we don't find the value
+			return NULL;
 		}
-		val_size = 0; 	// set val_size to 0 if we don't find the value
-		return NULL;
+		
+		val_size = std::get<1>(entry);
+		return std::get<0>(entry);
 	}
-<<<<<<< HEAD:Homework2/cache.cc
-
-	void del(key_type key){
-		// delete a key/value pair
-		unorderedmap_.erase(key);
-		//how to find amount by which to decrement memused?
-=======
 	
 	// This deletes a (key, tuple) entry from the map
 	void del(key_type key){
@@ -80,17 +83,11 @@ public:
 		unorderedmap_.erase(key);
 		delete[] val;
 		memused_ -= val_size;
->>>>>>> 41bf975ac4a113fc76cba35b53405a682efa0949:Hw2/cache.cc
 		return;
 	}
 
 	index_type space_used() const{
 		return memused_;
-<<<<<<< HEAD:Homework2/cache.cc
-
-
-	}
-=======
 	}
 
 
@@ -109,7 +106,6 @@ public:
 	
 	}
 
->>>>>>> 41bf975ac4a113fc76cba35b53405a682efa0949:Hw2/cache.cc
 };
 
 Cache::Cache(index_type maxmem,
@@ -117,11 +113,7 @@ Cache::Cache(index_type maxmem,
         hash_func hasher) 
 	: pImpl_(new Impl(maxmem,evictor,hasher))
  {
- // 	pimpl_ -> std::unordered_map<int, int> cachemap;
-	// myMaxmem = maxmem;
-	// myEvictor = evictor;
-	// myHasher = hasher;
-	// // put our stuff here
+
 }
 
 Cache::~Cache(){
@@ -153,30 +145,3 @@ void Cache::del(key_type key){
 Cache::index_type Cache::space_used() const {
 	return pImpl_->space_used();
 }
-
-
-
-
-
-
-
-// class foo::Impl {
-//  public:
-//   int value_;
-// };
-
-// foo::foo()
-//  : pimpl_(new Impl())
-// {
-//   pimpl_->value_ = 56;
-// }
-
-
-// foo::~foo()
-// {
-// }
-
-// int foo::dosomething()
-// {
-//   return pimpl_->value_;
-// }
