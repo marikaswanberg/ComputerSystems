@@ -22,6 +22,18 @@ TEST_CASE("test_inc_memused", "[space_used]"){
   REQUIRE(size == sizeof(value));
 }
 
+//memused increases properly after multiple sets
+TEST_CASE("test_mult_inc_memused", "[space_used]"){
+  Cache mycache(10);
+  char first[2] = "h";
+  char second[2] = "i";
+  mycache.set("first", first, sizeof(first));
+  mycache.set("second", second, sizeof(second));
+  Cache::index_type size = mycache.space_used();
+  REQUIRE(size == sizeof(first)+sizeof(second));
+  
+}
+
 // memused decreases properly when we delete elements
 TEST_CASE("test_dec_memused", "[space_used]"){
   Cache mycache(20);
@@ -43,6 +55,15 @@ TEST_CASE("test_get_valsize", "[get]"){
 }
 
 // // need to test that the correct value for a value in the cache.
+// Get is grabbing the correct value.
+TEST_CASE("test_get_general", "[get]"){
+  Cache mycache(10);
+  Cache::index_type size = 0;
+  int value = 6;
+  mycache.set("hello", &value, sizeof(value));
+  const int* val = static_cast<const int*>(mycache.get("hello", size));
+  REQUIRE(*val == 6);
+}
 
 // When value not in cache, get returns nullptr.
 TEST_CASE("test_get_not_in_cache", "[get]"){
@@ -67,7 +88,7 @@ TEST_CASE("test_get_deleted", "[get]"){
 TEST_CASE("test_get_evicted", "[get, evictor]"){
   Cache mycache(sizeof(int)); // only room for one int
   int value = 2018;
-  mycache.set("evicted", &value, sizeof(value);
+  mycache.set("evicted", &value, sizeof(value));
   int value2 = 2019;
   mycache.set("evictor", &value2, sizeof(value2)); // overflow the cache
   Cache::index_type size = 1;
@@ -83,23 +104,29 @@ TEST_CASE("test_get_modified", "[get]"){
   int modify = 99;
   mycache.set("test", buf, 10);
   mycache.set("test", &modify, sizeof(int)); // change value for "test" key
-  int val = mycache.get("test", size);
+  const int* val = static_cast<const int*>(mycache.get("test", size));
   REQUIRE(size == sizeof(int));
   REQUIRE(*val == 99);
 }
 
 // Cache evicts two items when necessary
 TEST_CASE("test_set_evict", "[evictor, set]"){
-  Cache mycache(2);
-  char first[1] = "h";
-  char second[1] = "i";
-  char evictor[2] = "hi"; 
+  Cache mycache(4);
+  char first[2] = "h";
+  char second[2] = "i";
+  char evictor[4] = "hi!"; 
   mycache.set("first", first, sizeof(first));
   mycache.set("second", second, sizeof(second));
   mycache.set("evictor", evictor, sizeof(evictor)); // this will necessarily evict both ints regardless of the eviction policy
- 
   Cache::index_type size = mycache.space_used();
   REQUIRE(size == sizeof(evictor));
   // we use chars because they are defined to have size 1 across all operating systems.
 }
 
+ TEST_CASE("test_invalid_delete", "[del]"){
+  Cache mycache(10);
+  char test[2] = "a";
+  mycache.set("test", test, sizeof(test));
+  mycache.del("not_test");
+  REQUIRE(mycache.space_used() == 2);
+ }
