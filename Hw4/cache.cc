@@ -50,6 +50,10 @@ public:
 		if (get(key, tmp) != nullptr || tmp != 0) {
 			del(key);
 		}
+		if size > maxmem_ {
+			throw std::invalid_argument("Size is greater than cache's maximum memory.");
+			return -1;
+		}
 		// Set the new value
 		val_type copy = new char[size];
 		std::memcpy((void*)copy, val, size);
