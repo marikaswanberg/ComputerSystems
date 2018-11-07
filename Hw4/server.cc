@@ -5,10 +5,24 @@
 #include <unistd.h>
 #include <cstdlib>
 
+
+
+using namespace Net;
+
+class CacheHandler : public Http::Handler {
+public:
+
+    HTTP_PROTOTYPE(CacheHandler)
+
+    void onRequest(const Http::Request& request, Http::ResponseWriter response) {
+         response.send(Http::Code::Ok, "Hello, World");
+    }
+};
+
 int main( int argc, char* argv[] )
 {
    	Cache::index_type maxmem = 20; 
-    int portnum = 2033 ;
+    int portnum = 3724; //join our igloo ;)
     
     int c ;
     while( ( c = getopt (argc, argv, "m:t:") ) != -1 ) 
@@ -24,4 +38,17 @@ int main( int argc, char* argv[] )
         }
     }
       std::cout << "maxmem: "<< maxmem <<" portnum: " << portnum<< std::endl ;   
+
+
+ 	Cache mycache(maxmem);
+
+    Net::Address addr(Net::Ipv4::any(), Net::Port(portnum));
+
+    auto opts = Http::Endpoint::options().threads(1);
+    Http::Endpoint server(addr);
+    server.init(opts);
+    server.setHandler(std::make_shared<HelloHandler>());
+    server.serve();
+
+
 }
