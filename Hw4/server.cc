@@ -1,26 +1,37 @@
-#include "pistache/endpoint.h"
+#include "pistache/include/pistache/endpoint.h"
 #include "cache.hh"
 
 #include <iostream>
+#include <vector>
+#include <string>
 #include <unistd.h>
 #include <cstdlib>
 
 
+// #include "crow.h"
 
-using namespace Net;
 
-class CacheHandler : public Http::Handler {
-public:
+std::vector<std::string> parse_request(std::string request) {
+	std::vector<std::string> request_vector;
+	size_t current_index = 0;
+	size_t prev_index = 0;
+	while(current_index != std::string::npos) {
+		current_index = request.find("/", current_index);
+		request_vector.push_back(request.substr(prev_index, current_index-prev_index));
+		prev_index = current_index+1;
+		if (current_index != std::string::npos) {
+			current_index++;
+		}
+	}
+	request_vector[0] = request_vector[0].substr(0, request_vector[0].find(" "));
 
-    HTTP_PROTOTYPE(CacheHandler)
+	return request_vector;
+}
 
-    void onRequest(const Http::Request& request, Http::ResponseWriter response) {
-         response.send(Http::Code::Ok, "Hello, World");
-    }
-};
 
-int main( int argc, char* argv[] )
+int main( /*int argc, char* argv[] */)
 {
+
    	Cache::index_type maxmem = 20; 
     int portnum = 3724; //join our igloo ;)
     
@@ -37,18 +48,47 @@ int main( int argc, char* argv[] )
                 break;
         }
     }
-      std::cout << "maxmem: "<< maxmem <<" portnum: " << portnum<< std::endl ;   
 
 
- 	Cache mycache(maxmem);
+	Cache server_cache(maxmem);
 
-    Net::Address addr(Net::Ipv4::any(), Net::Port(portnum));
+    crow::SimpleApp app;
 
-    auto opts = Http::Endpoint::options().threads(1);
-    Http::Endpoint server(addr);
-    server.init(opts);
-    server.setHandler(std::make_shared<HelloHandler>());
-    server.serve();
+    CROW_ROUTE(app, std::string request)([](){
+        std::vector<std::string> request_vector = parse_request(request)
+        if ((request_vector[0] == "GET") && (request_vector[1] == "memsize")) {
+        	response = server_cache.space_used();
+        	// send a JSON thing
+        }
+        if ((request_vector[0] == "GET") && (request_vector[1] == "key")) {
+        	response = server_cache.get(request_vector[2]);
+        	// JSON here
+        }
+
+       	if ((request_vector[0] == "PUT") && (request_vector[1] == "key")){
+       		server_cache.set(request_vector[2], request_vector[3]);
+       		// how do we access the client's value with a pointer...over the web?
+       	}
+       	if ((request_vector[0] == "DELETE") && (request_vector[1] == "key")){
+       		server_cache.del(server_cache[2]);
+       	}
+       	if (request_vector[0] == "HEAD" && (request_vector[1] == "key")){
+       		// idk
+       	}
+       	if (request_vector[0] == "POST" && (request_vector[1] == "shutdown")){
+       		// shutdown
+       	}
+
+       	else{
+        	//raise an error
+        	assert(0 && "Not a valid request");
+        }
+ 
+    });
+
+    app.port(18080).run();
+
+
 
 
 }
