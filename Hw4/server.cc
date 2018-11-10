@@ -8,7 +8,7 @@
 #include <cstdlib>
 
 
-// #include "crow.h"
+#include "crow.h"
 
 
 std::vector<std::string> parse_request(std::string request) {
@@ -29,7 +29,7 @@ std::vector<std::string> parse_request(std::string request) {
 }
 
 
-int main( /*int argc, char* argv[] */)
+int main( int argc, char* argv[])
 {
 
    	Cache::index_type maxmem = 20; 
@@ -55,24 +55,34 @@ int main( /*int argc, char* argv[] */)
     crow::SimpleApp app;
 
     CROW_ROUTE(app, std::string request)([](){
-        std::vector<std::string> request_vector = parse_request(request)
+        std::vector<std::string> request_vector = parse_request(request);
+
         if ((request_vector[0] == "GET") && (request_vector[1] == "memsize")) {
-        	response = server_cache.space_used();
+        	mem = server_cache.space_used();
+        	crow::json::wvalue x;
+        	x["memused"] = mem;
+        	return x;
         	// send a JSON thing
         }
         if ((request_vector[0] == "GET") && (request_vector[1] == "key")) {
-        	response = server_cache.get(request_vector[2]);
+        	val = server_cache.get(request_vector[2]);
+        	crow::json::wvalue x;
+    		x["key"] = request_vector[2];
+    		x["value"] = val;
+    		return x;
         	// JSON here
         }
 
        	if ((request_vector[0] == "PUT") && (request_vector[1] == "key")){
-       		server_cache.set(request_vector[2], request_vector[3]);
-       		// how do we access the client's value with a pointer...over the web?
+       		server_cache.set(request_vector[2], &request_vector[3], sizeof(request_vector[3]));
+
+ 			
        	}
        	if ((request_vector[0] == "DELETE") && (request_vector[1] == "key")){
        		server_cache.del(server_cache[2]);
        	}
        	if (request_vector[0] == "HEAD" && (request_vector[1] == "key")){
+
        		// idk
        	}
        	if (request_vector[0] == "POST" && (request_vector[1] == "shutdown")){
