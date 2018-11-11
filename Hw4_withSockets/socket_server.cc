@@ -6,6 +6,9 @@
 #include <netinet/in.h> 
 #include <string.h> 
 #include <iostream>
+#include <vector>
+
+
 
 Server::Server(int portnum=8080){
     portnum_ = portnum;
@@ -64,15 +67,7 @@ void Server::start_listen(){
     } 
     return;
 }
-void Server::read_and_parse(Cache server_cache){
-    char buffer[1024] = {0};
-    int valread = read(new_socket_ , buffer, 1024); 
-    std::vector<std::string> parsed_request = parse_request(buffer);
-    printf("%s\n",buffer ); 
-    char hello[] = "Hello from server";
-    send(new_socket_ , hello , strlen(hello) , 0 ); 
-    printf("Hello message sent\n"); 
-}
+
 
 std::vector<std::string> parse_request(std::string request) {
     std::vector<std::string> request_vector;
@@ -87,14 +82,16 @@ std::vector<std::string> parse_request(std::string request) {
         }
     }
     request_vector[0] = request_vector[0].substr(0, request_vector[0].find(" "));
-
+}
     // response??
+
+void execute_response(std::vector<std::string> request_vector, Cache server_cache){
     if(request_vector[0] == "GET"){
         if (request_vector[1] == "key"){
-            server_cache.get(request_vector[2]);
+           // server_cache.get(request_vector[2] /*, how to find valsize?*/);
         }
         if (request_vector[1] == "memsize"){
-            response = server_cache.memused();
+             response = server_cache.space_used();
         }
         else{
             // error
@@ -118,6 +115,16 @@ std::vector<std::string> parse_request(std::string request) {
     }
 }
 
+
+void Server::read_and_parse(Cache server_cache){
+    char buffer[1024] = {0};
+    int valread = read(new_socket_ , buffer, 1024); 
+    std::vector<std::string> parsed_request = parse_request(buffer);
+    printf("%s\n",buffer ); 
+    char hello[] = "Hello from server";
+    send(new_socket_ , hello , strlen(hello) , 0 ); 
+    printf("Hello message sent\n"); 
+}
 
 
 int main() 

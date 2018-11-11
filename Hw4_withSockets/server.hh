@@ -1,4 +1,5 @@
 #include <string>
+#include "cache.hh"
 
 class Server{
     int portnum_;
@@ -7,5 +8,5 @@ public:
     Server(int portnum);
     ~Server();
     void start_listen();
-    void read_and_parse();
+    void read_and_parse(Cache server_cache);
 };

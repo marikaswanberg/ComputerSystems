@@ -54,6 +54,8 @@ int main( int argc, char* argv[])
 
     crow::SimpleApp app;
 
+    CROW_ROUTE(app, "/memsize").methods("GET"_method)
+
     CROW_ROUTE(app, std::string request)([](){
         std::vector<std::string> request_vector = parse_request(request);
 
