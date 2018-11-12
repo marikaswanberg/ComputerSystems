@@ -8,5 +8,5 @@ public:
     Server(int portnum);
     ~Server();
     void start_listen();
-    void read_and_parse(Cache server_cache);
+    void read_and_parse(Cache &server_cache);
 };

@@ -10,6 +10,7 @@
 
 
 
+
 Server::Server(int portnum=8080){
     portnum_ = portnum;
 }
@@ -18,7 +19,7 @@ Server::~Server(){
 
 }
 void Server::start_listen(){
-    int server_fd; 
+    int server_fd;
     struct sockaddr_in address; 
     int opt = 1; 
     int addrlen = sizeof(address);   
@@ -82,30 +83,34 @@ std::vector<std::string> parse_request(std::string request) {
         }
     }
     request_vector[0] = request_vector[0].substr(0, request_vector[0].find(" "));
+    return request_vector;
 }
-    // response??
 
-void execute_response(std::vector<std::string> request_vector, Cache server_cache){
-    if(request_vector[0] == "GET"){
-        if (request_vector[1] == "key"){
-           // server_cache.get(request_vector[2] /*, how to find valsize?*/);
+
+
+
+std::string create_response(std::vector<std::string> request_vector, Cache &server_cache){
+    std::string response = "";
+    if((request_vector[0] == "GET") && (request_vector[1] == "key")){
+        Cache::index_type size = 0;
+        const std::string* val = static_cast<const std::string*>(server_cache.get(request_vector[2], size));
+        response = "{key: "+request_vector[1]+", value: "+ *val +"}";
         }
-        if (request_vector[1] == "memsize"){
-             response = server_cache.space_used();
+    if ((request_vector[0] == "GET") && (request_vector[1] == "memsize")){
+        Cache::index_type mem = server_cache.space_used();
+        response = "{memused: "+ std::to_string(mem)+ "}";
         }
-        else{
-            // error
-        }
-    }
     if((request_vector[0] == "PUT") && (request_vector[1] == "key")){
-        // set new value or update old one
-        server_cache.set(request_vector[2], &(request_vector[3]));
+            // set new value or update old one
+        server_cache.set(request_vector[2], &(request_vector[3]), sizeof(request_vector[3]));
     }
     if((request_vector[0] == "POST") && request_vector[1] == "shutdown"){
         //shutdown somehow
+        //shutdown(Server::server_fd, SHUT_RD);
     }
     if((request_vector[0] == "DELETE")&& (request_vector[1] == "key")){
         server_cache.del(request_vector[2]);
+
     }
     if(request_vector[0] == "HEAD"){
         //idk how to return just the header
@@ -113,16 +118,18 @@ void execute_response(std::vector<std::string> request_vector, Cache server_cach
     else {
         // raise an error for invalid message/request
     }
+    return response;
 }
 
 
-void Server::read_and_parse(Cache server_cache){
+
+void Server::read_and_parse(Cache &server_cache){
     char buffer[1024] = {0};
-    int valread = read(new_socket_ , buffer, 1024); 
+    read(new_socket_ , buffer, 1024); 
     std::vector<std::string> parsed_request = parse_request(buffer);
+    const char* response = create_response(parsed_request, server_cache).c_str();
     printf("%s\n",buffer ); 
-    char hello[] = "Hello from server";
-    send(new_socket_ , hello , strlen(hello) , 0 ); 
+    send(new_socket_ , response, strlen(response) , 0 ); 
     printf("Hello message sent\n"); 
 }
 
