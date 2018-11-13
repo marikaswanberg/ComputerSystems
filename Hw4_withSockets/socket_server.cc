@@ -91,6 +91,7 @@ std::vector<std::string> parse_request(std::string request) {
 
 std::string create_response(std::vector<std::string> request_vector, Cache &server_cache){
     std::string response = "";
+    std::cout << "request vector " << request_vector.at(0) << ", " << request_vector.at(1) << request_vector.at(2) << std::endl;
     if((request_vector[0] == "GET") && (request_vector[1] == "key")){
         Cache::index_type size = 0;
         const std::string* val = static_cast<const std::string*>(server_cache.get(request_vector[2], size));
@@ -102,14 +103,14 @@ std::string create_response(std::vector<std::string> request_vector, Cache &serv
         }
     if((request_vector[0] == "PUT") && (request_vector[1] == "key")){
             // set new value or update old one
-        server_cache.set(request_vector[2], &(request_vector[3]), sizeof(request_vector[3]));
+        response = std::to_string(server_cache.set(request_vector[2], &(request_vector[3]), sizeof(request_vector[3])));
     }
     if((request_vector[0] == "POST") && request_vector[1] == "shutdown"){
         //shutdown somehow
         //shutdown(Server::server_fd, SHUT_RD);
     }
     if((request_vector[0] == "DELETE")&& (request_vector[1] == "key")){
-        server_cache.del(request_vector[2]);
+        response = std::to_string(server_cache.del(request_vector[2]));
 
     }
     if(request_vector[0] == "HEAD"){
@@ -118,6 +119,7 @@ std::string create_response(std::vector<std::string> request_vector, Cache &serv
     else {
         // raise an error for invalid message/request
     }
+    std::cout << response << std::endl;
     return response;
 }
 
@@ -130,18 +132,20 @@ void Server::read_and_parse(Cache &server_cache){
     const char* response = create_response(parsed_request, server_cache).c_str();
     printf("%s\n",buffer ); 
     send(new_socket_ , response, strlen(response) , 0 ); 
-    printf("Hello message sent\n"); 
+    printf("%s\n",response); 
 }
 
 
 int main() 
-{
-    Cache mycache(10);
+ {
+    Cache mycache(100);
     Server myserver;
     std::cout << "a" << std::endl;
     myserver.start_listen();
     std::cout << "b" << std::endl;
+    while(true) {
     myserver.read_and_parse(mycache);
     std::cout << "c" << std::endl;
+    }
     return 0; 
 }

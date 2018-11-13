@@ -12,7 +12,7 @@ int main(int argc, char const *argv[])
     struct sockaddr_in address; 
     int sock = 0, valread; 
     struct sockaddr_in serv_addr; 
-    char *hello = "Hello from client"; 
+    char *hello = "PUT key/hello/jill"; 
     char buffer[1024] = {0}; 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
     { 
@@ -37,8 +37,9 @@ int main(int argc, char const *argv[])
         printf("\nConnection Failed \n"); 
         return -1; 
     } 
+    ///
     send(sock , hello , strlen(hello) , 0 ); 
-    printf("Hello message sent\n"); 
+    printf("Awesome message sent\n"); 
     valread = read( sock , buffer, 1024); 
     printf("%s\n",buffer ); 
     return 0; 
