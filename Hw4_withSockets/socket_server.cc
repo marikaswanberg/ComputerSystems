@@ -12,7 +12,8 @@
 
 
 Server::Server(int portnum=8080){
-    portnum_ = portnum;
+    portnum_ = portnum; 
+    running_ = true;
 }
 
 Server::~Server(){
@@ -70,7 +71,7 @@ void Server::start_listen(){
 }
 
 
-std::vector<std::string> parse_request(std::string request) {
+std::vector<std::string> Server::parse_request(std::string request) {
     std::vector<std::string> request_vector;
     size_t current_index = 0;
     size_t prev_index = 0;
@@ -89,17 +90,22 @@ std::vector<std::string> parse_request(std::string request) {
 
 
 
-std::string create_response(std::vector<std::string> request_vector, Cache &server_cache){
+std::string Server::create_response(std::vector<std::string> request_vector, Cache &server_cache){
     std::string response = "";
     if((request_vector[0] == "GET") && (request_vector[1] == "key")){
         Cache::index_type size = 0;
         const std::string* val = static_cast<const std::string*>(server_cache.get(request_vector[2], size));
-        response = "{key: "+request_vector[1]+", value: "+ *val +"}";
+        if (val == nullptr){
+            response = "{key: "+request_vector[2]+", value: nullptr}";
         }
+        else{
+            response = "{key: "+request_vector[2]+", value: "+ *val +"}";
+        }
+    }
     else if ((request_vector[0] == "GET") && (request_vector[1] == "memsize")){
         Cache::index_type mem = server_cache.space_used();
         response = "{memused: "+ std::to_string(mem)+ "}";
-        }
+    }
     else if((request_vector[0] == "PUT") && (request_vector[1] == "key")){
             // set new value or update old one
         response = std::to_string(server_cache.set(request_vector[2], &(request_vector[3]), sizeof(request_vector[3])));
@@ -107,6 +113,7 @@ std::string create_response(std::vector<std::string> request_vector, Cache &serv
     else if((request_vector[0] == "POST") && request_vector[1] == "shutdown"){
         //shutdown somehow
         //shutdown(Server::server_fd, SHUT_RD);
+        running_ = false;
     }
     else if((request_vector[0] == "DELETE")&& (request_vector[1] == "key")){
         response = std::to_string(server_cache.del(request_vector[2]));
@@ -116,7 +123,9 @@ std::string create_response(std::vector<std::string> request_vector, Cache &serv
         //idk how to return just the header
     }
     else if (request_vector[0] == ""){
+
         // empty message
+    }
     else {
         // raise an error for invalid message/request
         std::cout << "invalid message format" << std::endl;
@@ -130,23 +139,38 @@ void Server::read_and_parse(Cache &server_cache){
     char buffer[1024] = {0};
     read(new_socket_ , buffer, 1024); 
     std::vector<std::string> parsed_request = parse_request(buffer);
-    const char* response = create_response(parsed_request, server_cache).c_str();
-   // printf("%s\n",buffer ); 
-    send(new_socket_ , response, strlen(response) , 0 ); 
-   // printf("%s\n",response); 
+    std::string response = create_response(parsed_request, server_cache).c_str();
+    send(new_socket_ , response.c_str(), response.size() + 1 , 0 ); 
+    
 }
 
 
-int main() 
- {
-    Cache mycache(100);
-    Server myserver;
-    std::cout << "a" << std::endl;
+int main( int argc, char* argv[])
+{
+
+    Cache::index_type maxmem = sizeof(std::string); 
+    int portnum = 8080; //join our igloo ;)
+    
+    // parse the maxmem and portnum inputs
+    int c ;
+    while( ( c = getopt (argc, argv, "m:t:") ) != -1 ) 
+    {
+        switch(c)
+        {
+            case 'm':
+                if(optarg) maxmem = (Cache::index_type)std::atoi(optarg);
+                break;
+            case 't':
+                if(optarg) portnum = std::atoi(optarg) ;
+                break;
+        }
+    }
+
+    Cache mycache(maxmem);
+    Server myserver(portnum);
     myserver.start_listen();
-    std::cout << "b" << std::endl;
     while(true) {
     myserver.read_and_parse(mycache);
-    std::cout << "c" << std::endl;
     }
     return 0; 
 }

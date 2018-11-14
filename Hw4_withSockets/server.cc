@@ -29,7 +29,7 @@ std::vector<std::string> parse_request(std::string request) {
 }
 
 
-int main( /*int argc, char* argv[] */)
+int main( int argc, char* argv[])
 {
 
    	Cache::index_type maxmem = 20; 

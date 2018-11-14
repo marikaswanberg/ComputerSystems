@@ -52,20 +52,18 @@ public:
 	}
 
 	~Impl(){
-		// idk how this is going to work
-		auto it = unorderedmap_.begin();
-		while (it != unorderedmap_.end()) {
-			delete[] static_cast<const char*>(std::get<0>(it->second));
-			it = unorderedmap_.erase(it);
+		// shutdown the server
+		std::string shutdown_msg = "POST /shutdown";
+		send(sock_, shutdown_msg.c_str(), shutdown_msg.size()+1, 0);
+
 		}
-	}
 
 	int set(key_type key, val_type val, index_type size){
 		const std::string* value = static_cast<const std::string*>(val);
 		std::string message = "PUT /key/" + key + "/" + value->c_str();
 		char buffer[1024] = {0};
 		size ++; // we need to use size, but don't actually need it
-		send(sock_ , message.c_str() , sizeof(message) , 0 );  
+		send(sock_ , message.c_str() , message.size()+1 , 0 );  
     	read(sock_ , buffer, 1024);
 		return std::atoi(buffer);
 	}
@@ -73,12 +71,15 @@ public:
 	val_type get(key_type key, index_type& val_size) const {
 		char buffer[1024] = {0};
 		std::string message = "GET /key/" + key;
-		send(sock_, message.c_str(), sizeof(message), 0);
+		send(sock_, message.c_str(), message.size()+1, 0);
 		read(sock_ , buffer, 1024);
 		std::string strbuffer = static_cast<std::string>(buffer);
 		size_t value_index = strbuffer.find("value: ", 0) + 7;
 		std::string value = strbuffer.substr(value_index, (strbuffer.length() - value_index -1));
-		//update val_size
+		if (value == "nullptr"){
+			val_size = 0;
+			return nullptr;
+		}
 		val_size = sizeof(value);
 		val_type val = &value;
 		return val;
@@ -87,17 +88,18 @@ public:
 	// This deletes a (key, tuple) entry from the map
 	int del(key_type key){
 		char buffer[1024] = {0};
-		std::string message = "DELETE /key" + key;
-		send(sock_, message.c_str(), sizeof(message), 0);
+		std::string message = "DELETE /key/" + key;
+		send(sock_, message.c_str(), message.size()+1, 0);
 		read(sock_ , buffer, 1024);
 		std::string strbuffer = static_cast<std::string>(buffer);
 		return std::stoi(strbuffer);
 	}
 
 	index_type space_used() const{
+		
 		char buffer[1024] = {0};
 		std::string message = "GET /memsize";
-		send(sock_, message.c_str(), sizeof(message), 0);
+		send(sock_, message.c_str(), message.size()+1, 0);
 		read(sock_ , buffer, 1024);
 		std::string strbuffer = static_cast<std::string>(buffer);
 		size_t value_index = strbuffer.find("memused: ", 0) + 9;
@@ -144,11 +146,17 @@ Cache::index_type Cache::space_used() const {
 }
 
 // int main(){
-// 	std::cout << "test_inc_memused" << std::endl;
-// 	Cache mycache(100);
+// // std::cout << "test_init_empty" << std::endl;
+//  //  	Cache mycache(10);
+//  //  	std::cout << (mycache.space_used() == 0) << std::endl;
+
+// 	std::cout << "test_inc_memused1" << std::endl;
+// 	Cache mycache2(100);
 //   	std::string value = "marika";
-//     mycache.set("hello", &value, sizeof(value));
-//     Cache::index_type size = mycache.space_used();
+//     mycache2.set("hello", &value, sizeof(value));
+//     std::cout << "passed set, starting spaceused" << std::endl;
+//     Cache::index_type size = mycache2.space_used();
+//     std::cout << "finished space_used" << std::endl;
 //     std::cout << (size == sizeof(value)) << std::endl;
 //     return 0;
 // }
