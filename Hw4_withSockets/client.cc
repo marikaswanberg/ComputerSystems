@@ -143,10 +143,15 @@ Cache::index_type Cache::space_used() const {
 	return pImpl_->space_used();
 }
 
-
-int main() {
-
-}
+// int main(){
+// 	std::cout << "test_inc_memused" << std::endl;
+// 	Cache mycache(100);
+//   	std::string value = "marika";
+//     mycache.set("hello", &value, sizeof(value));
+//     Cache::index_type size = mycache.space_used();
+//     std::cout << (size == sizeof(value)) << std::endl;
+//     return 0;
+// }
 
 
 

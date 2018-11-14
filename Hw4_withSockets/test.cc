@@ -9,14 +9,16 @@ This file tests our Cache.
 
 // cache is empty upon initialization
 TEST_CASE("test_init_empty", "[space_used]"){
+  std::cout << "test_init_empty" << std::endl;
   Cache mycache(10);
   REQUIRE(mycache.space_used() == 0);
 }
 
 // memused increases properly when we set a new value
 TEST_CASE("test_inc_memused", "[space_used]"){
-  Cache mycache(10);
-  int value = 6;
+  std::cout << "test_inc_memused" << std::endl;
+  Cache mycache(100);
+  std::string value = "marika";
   mycache.set("hello", &value, sizeof(value));
   Cache::index_type size = mycache.space_used();
   REQUIRE(size == sizeof(value));
@@ -24,6 +26,7 @@ TEST_CASE("test_inc_memused", "[space_used]"){
 
 //memused increases properly after multiple sets
 TEST_CASE("test_mult_inc_memused", "[space_used]"){
+  std::cout << "test_mult_inc_memused" << std::endl;
   Cache mycache(10);
   char first[2] = "h";
   char second[2] = "i";
@@ -36,6 +39,7 @@ TEST_CASE("test_mult_inc_memused", "[space_used]"){
 
 // memused decreases properly when we delete elements
 TEST_CASE("test_dec_memused", "[space_used]"){
+  std::cout << "test_dec_memused" << std::endl;
   Cache mycache(20);
   char buf[10];
   mycache.set("hello", buf, 10);
@@ -75,6 +79,7 @@ TEST_CASE("test_get_not_in_cache", "[get]"){
 
 // Get does not return deleted values.
 TEST_CASE("test_get_deleted", "[get]"){
+  std::cout << "test_get_deleted" << std::endl;
   Cache mycache(20);
   Cache::index_type size = 0;
   char buf[10];

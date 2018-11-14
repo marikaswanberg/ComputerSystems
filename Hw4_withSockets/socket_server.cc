@@ -96,28 +96,30 @@ std::string create_response(std::vector<std::string> request_vector, Cache &serv
         const std::string* val = static_cast<const std::string*>(server_cache.get(request_vector[2], size));
         response = "{key: "+request_vector[1]+", value: "+ *val +"}";
         }
-    if ((request_vector[0] == "GET") && (request_vector[1] == "memsize")){
+    else if ((request_vector[0] == "GET") && (request_vector[1] == "memsize")){
         Cache::index_type mem = server_cache.space_used();
         response = "{memused: "+ std::to_string(mem)+ "}";
         }
-    if((request_vector[0] == "PUT") && (request_vector[1] == "key")){
+    else if((request_vector[0] == "PUT") && (request_vector[1] == "key")){
             // set new value or update old one
         response = std::to_string(server_cache.set(request_vector[2], &(request_vector[3]), sizeof(request_vector[3])));
     }
-    if((request_vector[0] == "POST") && request_vector[1] == "shutdown"){
+    else if((request_vector[0] == "POST") && request_vector[1] == "shutdown"){
         //shutdown somehow
         //shutdown(Server::server_fd, SHUT_RD);
     }
-    if((request_vector[0] == "DELETE")&& (request_vector[1] == "key")){
+    else if((request_vector[0] == "DELETE")&& (request_vector[1] == "key")){
         response = std::to_string(server_cache.del(request_vector[2]));
 
     }
-    if(request_vector[0] == "HEAD"){
+    else if(request_vector[0] == "HEAD"){
         //idk how to return just the header
     }
+    else if (request_vector[0] == ""){
+        // empty message
     else {
         // raise an error for invalid message/request
-        std::cout << "ERRRRRRRROOOOOOOORRRRRRRR :)" << std::endl;
+        std::cout << "invalid message format" << std::endl;
     }
     return response;
 }
@@ -129,9 +131,9 @@ void Server::read_and_parse(Cache &server_cache){
     read(new_socket_ , buffer, 1024); 
     std::vector<std::string> parsed_request = parse_request(buffer);
     const char* response = create_response(parsed_request, server_cache).c_str();
-    printf("%s\n",buffer ); 
+   // printf("%s\n",buffer ); 
     send(new_socket_ , response, strlen(response) , 0 ); 
-    printf("%s\n",response); 
+   // printf("%s\n",response); 
 }
 
 
