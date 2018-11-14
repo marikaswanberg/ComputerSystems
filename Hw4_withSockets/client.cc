@@ -1,18 +1,11 @@
-// create_connection(){
-    
-// }
-
-// send_request(){}
-
-// read_response(){}
-
-// main{
-    
-//     create connection
-//     send request
-//     read response
-// }
-
+#include <unistd.h> 
+#include <stdio.h> 
+#include <sys/socket.h> 
+#include <stdlib.h> 
+#include <netinet/in.h> 
+#include <string.h> 
+#include <vector>
+#include <arpa/inet.h>
 
 #include "cache.hh"
 #include <cstring>
@@ -26,19 +19,19 @@ struct Cache::Impl {
 	hash_func hasher_;
 	index_type memused_;
 	index_type newest_;
-	const int portnum_ ;
-	int sock_; 
 	std::unordered_map<std::string, std::tuple<val_type, index_type, index_type>> unorderedmap_;
+	const int portnum_ ;
+	int sock_;
+
 public:
 	Impl(index_type maxmem, hash_func hasher) 
 	: maxmem_(maxmem), hasher_(hasher), memused_(0), newest_(0), unorderedmap_(), portnum_(8080), sock_(0){
-		struct sockaddr_in address;  
+		//struct sockaddr_in address;  
 	    struct sockaddr_in serv_addr;  
-	    char buffer[1024] = {0}; 
+	    //char buffer[1024] = {0}; 
 	    if ((sock_ = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
 	    { 
-	        printf("\n Socket creation error \n"); 
-	        return -1; 
+	        printf("\n Socket creation error \n");  
 	    } 
 	   
 	    memset(&serv_addr, '0', sizeof(serv_addr)); 
@@ -49,14 +42,12 @@ public:
 	    // Convert IPv4 and IPv6 addresses from text to binary form 
 	    if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0)  
 	    { 
-	        printf("\nInvalid address/ Address not supported \n"); 
-	        return -1; 
+	        printf("\nInvalid address/ Address not supported \n");
 	    } 
 	   
 	    if (connect(sock_, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) 
 	    { 
 	        printf("\nConnection Failed \n"); 
-	        return -1; 
 	    } 
 	}
 
@@ -70,25 +61,48 @@ public:
 	}
 
 	int set(key_type key, val_type val, index_type size){
-		std::string message = "POST key/" + key + "/" + val;
-		send(sock_ , message , sizeof(message) , 0 );  
-    	read( sock , buffer, 1024);
+		const std::string* value = static_cast<const std::string*>(val);
+		std::string message = "PUT /key/" + key + "/" + value->c_str();
+		char buffer[1024] = {0};
+		size ++; // we need to use size, but don't actually need it
+		send(sock_ , message.c_str() , sizeof(message) , 0 );  
+    	read(sock_ , buffer, 1024);
 		return std::atoi(buffer);
 	}
 
 	val_type get(key_type key, index_type& val_size) const {
-		
-		return std::get<0>(entry);
+		char buffer[1024] = {0};
+		std::string message = "GET /key/" + key;
+		send(sock_, message.c_str(), sizeof(message), 0);
+		read(sock_ , buffer, 1024);
+		std::string strbuffer = static_cast<std::string>(buffer);
+		size_t value_index = strbuffer.find("value: ", 0) + 7;
+		std::string value = strbuffer.substr(value_index, (strbuffer.length() - value_index -1));
+		//update val_size
+		val_size = sizeof(value);
+		val_type val = &value;
+		return val;
 	}
 	
 	// This deletes a (key, tuple) entry from the map
 	int del(key_type key){
-		
-		return 0;
+		char buffer[1024] = {0};
+		std::string message = "DELETE /key" + key;
+		send(sock_, message.c_str(), sizeof(message), 0);
+		read(sock_ , buffer, 1024);
+		std::string strbuffer = static_cast<std::string>(buffer);
+		return std::stoi(strbuffer);
 	}
 
 	index_type space_used() const{
-		
+		char buffer[1024] = {0};
+		std::string message = "GET /memsize";
+		send(sock_, message.c_str(), sizeof(message), 0);
+		read(sock_ , buffer, 1024);
+		std::string strbuffer = static_cast<std::string>(buffer);
+		size_t value_index = strbuffer.find("memused: ", 0) + 9;
+		std::string mem = strbuffer.substr(value_index, (strbuffer.length() - value_index -1));
+		return std::stoi(mem);
 	}
 
 };
@@ -128,3 +142,13 @@ int Cache::del(key_type key){
 Cache::index_type Cache::space_used() const {
 	return pImpl_->space_used();
 }
+
+
+int main() {
+
+}
+
+
+
+
+

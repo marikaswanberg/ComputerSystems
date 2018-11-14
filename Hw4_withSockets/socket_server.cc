@@ -91,7 +91,6 @@ std::vector<std::string> parse_request(std::string request) {
 
 std::string create_response(std::vector<std::string> request_vector, Cache &server_cache){
     std::string response = "";
-    std::cout << "request vector " << request_vector.at(0) << ", " << request_vector.at(1) << request_vector.at(2) << std::endl;
     if((request_vector[0] == "GET") && (request_vector[1] == "key")){
         Cache::index_type size = 0;
         const std::string* val = static_cast<const std::string*>(server_cache.get(request_vector[2], size));
@@ -118,8 +117,8 @@ std::string create_response(std::vector<std::string> request_vector, Cache &serv
     }
     else {
         // raise an error for invalid message/request
+        std::cout << "ERRRRRRRROOOOOOOORRRRRRRR :)" << std::endl;
     }
-    std::cout << response << std::endl;
     return response;
 }
 
