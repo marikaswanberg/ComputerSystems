@@ -147,9 +147,8 @@ void Server::read_and_parse(Cache &server_cache){
 
 int main( int argc, char* argv[])
 {
-
-    Cache::index_type maxmem = sizeof(std::string); 
-    int portnum = 8080; //join our igloo ;)
+    int portnum = 8080;
+    int maxmem = 100;
     
     // parse the maxmem and portnum inputs
     int c ;
