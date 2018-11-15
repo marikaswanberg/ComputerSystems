@@ -149,7 +149,7 @@ int main( int argc, char* argv[])
 {
     int portnum = 8080;
     int maxmem = 100;
-    
+
     // parse the maxmem and portnum inputs
     int c ;
     while( ( c = getopt (argc, argv, "m:t:") ) != -1 ) 
@@ -164,6 +164,7 @@ int main( int argc, char* argv[])
                 break;
         }
     }
+    std::cout << "Initializing server with " << "maxmem: " << maxmem << " and portnum: " << portnum <<std::endl;
 
     Cache mycache(maxmem);
     Server myserver(portnum);
