@@ -1,0 +1,57 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{color}
+\usepackage[total={6in,8in}]{geometry}
+\usepackage{amsthm}
+
+\usepackage{enumitem}
+\usepackage{centernot}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\sn}{\mathfrak{S}}
+\newcommand{\ve}{\varepsilon}
+\setlength{\parindent}{0cm}
+
+
+\author{by Marika Swanberg and Jillian James}
+\title{\texttt{Sock() It to Me}}
+\date{}
+\begin{document}
+\maketitle
+\bigskip 
+\section{Compilation}
+We have the following server files:
+\begin{itemize}
+\item cache.hh/cache.cc: Our cache implementation. Handles \texttt{get()}, \texttt{set()}, and  \texttt{del()} methods on the actual key/value cache
+\item server.hh/server.cc: This sets up a server with sockets that accepts and parses messages from client, executes the proper cache operations, and sends the results to the client.
+\end{itemize}
+To compile the server, run \texttt{g++ -o server cache.cc server.cc} 
+\bigskip
+
+Our client files:
+\begin{itemize}
+\item cache.hh/client.cc: The cache.hh defines the API for client.cc. When the client calls \texttt{get()}, for example, client.cc sends the appropriate message to the server and parses the response from the server to return to the client.
+\item catch2.hpp: a testing framework for our test.cc file
+\item test.cc: our tests, written using the Catch2 framework
+\end{itemize}
+To compile the client, run \texttt{g++ -o client client.cc test.cc catch2.hpp}. This will take a minute because catch2.hpp has like 14,000 lines.
+\section{Design Choices}
+We struggled to install and understand a lot of the networks libraries because they were very poorly documented (or not at all, in some cases). Instead, we scrapped that work, and wrote our server and client using just sockets and we generally recommend this approach. We got a lot of help from this example ``hello world'' client and server: https:\//\//www.geeksforgeeks.org\//socket\-programming\-cc/. We modified this code to our use case and read up on some of the socket functions. We also got some initial help/consultation from Marika's family during a very timely wedding that immeasurably helped our progress on the socket implementation.
+
+\section{Problems}
+We encountered a few problems that we were unable to fix gracefully at this time. The main problem we had is that our tests, while they pass individually, \textbf{any two tests cannot be run in succession} because the server will shut down after the first cache is destructed.
+
+We have some incomplete portions in our server, namely:
+\begin{enumerate}
+\item We do not properly shut down the server and free the cache memory
+\item We did not implement the ``HEAD'' message/command
+\end{enumerate}
+While we would have wanted to implement these with the given time, we thought it was better to focus on getting the tests to pass for the items we did implement.
+\end{document}
