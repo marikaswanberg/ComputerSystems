@@ -1,3 +1,12 @@
+/*
+    This program sets up a server for handling cache commands from
+    the client, written fully with web sockets. We got most of our code
+    from an example that we modified to fit our use case: 
+    https://www.geeksforgeeks.org/socket-programming-cc/
+    
+    By Jillian James and Marika Swanberg 
+*/
+
 #include "server.hh"
 #include <unistd.h> 
 #include <stdio.h> 
@@ -19,6 +28,9 @@ Server::Server(int portnum=8080){
 Server::~Server(){
 
 }
+// This function establishes the a connection with the socket.
+// It only needs to be called once, and after that we can read 
+// from the channel using read();
 void Server::start_listen(){
     int server_fd;
     struct sockaddr_in address; 
@@ -70,7 +82,8 @@ void Server::start_listen(){
     return;
 }
 
-
+// This function parses incoming requests of the form "GET /key/k"
+// into a vector with each component, i.e. ["GET", "key", "k"]
 std::vector<std::string> Server::parse_request(std::string request) {
     std::vector<std::string> request_vector;
     size_t current_index = 0;
@@ -88,8 +101,9 @@ std::vector<std::string> Server::parse_request(std::string request) {
 }
 
 
-
-
+// This function takes the parsed vector as input and executes the command 
+// specified by the vector, so the vector ["GET", "key", "k"] will actually send
+// execute a call to get() on the cache.
 std::string Server::create_response(std::vector<std::string> request_vector, Cache &server_cache){
     std::string response = "";
     if((request_vector[0] == "GET") && (request_vector[1] == "key")){
@@ -123,18 +137,19 @@ std::string Server::create_response(std::vector<std::string> request_vector, Cac
         //idk how to return just the header
     }
     else if (request_vector[0] == ""){
-
         // empty message
     }
     else {
         // raise an error for invalid message/request
-        std::cout << "invalid message format" << std::endl;
+        perror("invalid message format");
     }
     return response;
 }
 
 
-
+// This function reads the incoming messages from the socket,
+// parses their contents, executes the appropriate cache commands,
+// and sends the corresponding response to the client.
 void Server::read_and_parse(Cache &server_cache){
     char buffer[1024] = {0};
     read(new_socket_ , buffer, 1024); 
@@ -147,6 +162,7 @@ void Server::read_and_parse(Cache &server_cache){
 
 int main( int argc, char* argv[])
 {
+    // defaults
     int portnum = 8080;
     int maxmem = 100;
 
@@ -166,11 +182,13 @@ int main( int argc, char* argv[])
     }
     std::cout << "Initializing server with " << "maxmem: " << maxmem << " and portnum: " << portnum <<std::endl;
 
+    // initialize the server
     Cache mycache(maxmem);
     Server myserver(portnum);
+    // establish a connection
     myserver.start_listen();
     while(true) {
-    myserver.read_and_parse(mycache);
+        myserver.read_and_parse(mycache);
     }
     return 0; 
 }

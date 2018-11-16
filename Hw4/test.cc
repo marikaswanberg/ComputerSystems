@@ -1,5 +1,6 @@
 /*
-This file tests our Cache.
+This file tests our Cache. We modified the tests to only use strings as 
+the values (as per the API specification)
  */
 #include "cache.hh"
 
@@ -15,20 +16,20 @@ TEST_CASE("test_init_empty", "[space_used]"){
 
 // memused increases properly when we set a new value
 TEST_CASE("test_inc_memused", "[space_used]"){
-  Cache mycache(10);
-  int value = 6;
-  mycache.set("hello", &value, sizeof(value));
-  Cache::index_type size = mycache.space_used();
+  Cache mycache2(100);
+  std::string value = "marika";
+  mycache2.set("hello", &value, sizeof(value));
+  Cache::index_type size = mycache2.space_used();
   REQUIRE(size == sizeof(value));
 }
 
 //memused increases properly after multiple sets
 TEST_CASE("test_mult_inc_memused", "[space_used]"){
   Cache mycache(10);
-  char first[2] = "h";
-  char second[2] = "i";
-  mycache.set("first", first, sizeof(first));
-  mycache.set("second", second, sizeof(second));
+  std::string first = "h";
+  std::string second = "i";
+  mycache.set("first", &first, sizeof(first));
+  mycache.set("second", &second, sizeof(second));
   Cache::index_type size = mycache.space_used();
   REQUIRE(size == sizeof(first)+sizeof(second));
   
@@ -36,9 +37,9 @@ TEST_CASE("test_mult_inc_memused", "[space_used]"){
 
 // memused decreases properly when we delete elements
 TEST_CASE("test_dec_memused", "[space_used]"){
-  Cache mycache(20);
-  char buf[10];
-  mycache.set("hello", buf, 10);
+  Cache mycache(100);
+  std::string buf = "this will be deleted";
+  mycache.set("hello", &buf, sizeof(buf));
   mycache.del("hello");
   Cache::index_type size = mycache.space_used();
   REQUIRE(size == 0);
@@ -48,21 +49,21 @@ TEST_CASE("test_dec_memused", "[space_used]"){
 TEST_CASE("test_get_valsize", "[get]"){
   Cache mycache(10);
   Cache::index_type size = 0;
-  int value = 6;
+  std::string value = "eitan";
   mycache.set("hello", &value, sizeof(value));
   mycache.get("hello", size);
   REQUIRE(size == sizeof(value));
 }
 
-// // need to test that the correct value for a value in the cache.
+// need to test that the correct value for a value in the cache.
 // Get is grabbing the correct value.
 TEST_CASE("test_get_general", "[get]"){
   Cache mycache(10);
   Cache::index_type size = 0;
-  int value = 6;
-  mycache.set("hello", &value, sizeof(value));
-  const int* val = static_cast<const int*>(mycache.get("hello", size));
-  REQUIRE(*val == 6);
+  std::string value = "rocks";
+  mycache.set("computer systems", &value, sizeof(value));
+  const std::string* val = static_cast<const std::string*>(mycache.get("computer systems", size));
+  REQUIRE(*val == "rocks");
 }
 
 // When value not in cache, get returns nullptr.
@@ -75,21 +76,22 @@ TEST_CASE("test_get_not_in_cache", "[get]"){
 
 // Get does not return deleted values.
 TEST_CASE("test_get_deleted", "[get]"){
-  Cache mycache(20);
+  Cache mycache(100);
   Cache::index_type size = 0;
-  char buf[10];
-  mycache.set("test", buf, 10);
+  std::string to_delete = "this will be deleted!";
+  mycache.set("test", &to_delete, 10);
   mycache.del("test");
   Cache::val_type val = mycache.get("test", size);
   REQUIRE(val == NULL);
 }
 
-// Can't get an element that has been evicted.
+//Can't get an element that has been evicted. (Run this test on a server with a memsize input of 32)
 TEST_CASE("test_get_evicted", "[get, evictor]"){
-  Cache mycache(sizeof(int)); // only room for one int
-  int value = 2018;
+  std::string value = "2018";
+  std::cout << "Run test_get_evicted on a server with memsize input: " << sizeof(value) << std::endl;
+  Cache mycache(32); // only room for one string
   mycache.set("evicted", &value, sizeof(value));
-  int value2 = 2019;
+  std::string value2 = "2019";
   mycache.set("evictor", &value2, sizeof(value2)); // overflow the cache
   Cache::index_type size = 1;
   Cache::val_type val = mycache.get("evicted", size); // this is the element that got evicted
@@ -98,35 +100,36 @@ TEST_CASE("test_get_evicted", "[get, evictor]"){
 
 // Get function returns the correct value after key is modified
 TEST_CASE("test_get_modified", "[get]"){
-  Cache mycache(20);
+  Cache mycache(100);
   Cache::index_type size = 0;
-  char buf[10];
-  int modify = 99;
-  mycache.set("test", buf, 10);
-  mycache.set("test", &modify, sizeof(int)); // change value for "test" key
-  const int* val = static_cast<const int*>(mycache.get("test", size));
-  REQUIRE(size == sizeof(int));
-  REQUIRE(*val == 99);
+  std::string val = "hello";
+  std::string modify = "hi";
+  mycache.set("test", &val, sizeof(val));
+  mycache.set("test", &modify, sizeof(modify)); // change value for "test" key
+  const std::string* changed = static_cast<const std::string*>(mycache.get("test", size));
+  REQUIRE(size == sizeof(modify));
+  REQUIRE(*changed == modify);
 }
 
-// Cache evicts two items when necessary
+// Cache evicts two items when necessary 
+// (This won't pass for client/server project. Strings are always 32 bytes so there's no need to evict 2 strings to add 1.)
 TEST_CASE("test_set_evict", "[evictor, set]"){
-  Cache mycache(4);
-  char first[2] = "h";
-  char second[2] = "i";
-  char evictor[4] = "hi!"; 
-  mycache.set("first", first, sizeof(first));
-  mycache.set("second", second, sizeof(second));
-  mycache.set("evictor", evictor, sizeof(evictor)); // this will necessarily evict both ints regardless of the eviction policy
+  std::string first = "h";
+  std::string second = "i";
+  std::string third = "hello there!";
+  Cache mycache(64);
+  mycache.set("first", &first, sizeof(first));
+  mycache.set("second", &second, sizeof(first));
+  mycache.set("evictor", &third, sizeof(third)); // this will necessarily evict both regardless of the eviction policy
   Cache::index_type size = mycache.space_used();
-  REQUIRE(size == sizeof(evictor));
-  // we use chars because they are defined to have size 1 across all operating systems.
+  REQUIRE(size == sizeof(third));
 }
 
- TEST_CASE("test_invalid_delete", "[del]"){
-  Cache mycache(10);
-  char test[2] = "a";
-  mycache.set("test", test, sizeof(test));
+//Tests that we cannot delete an item that is not in the cache.
+TEST_CASE("test_invalid_delete", "[del]"){
+  Cache mycache(100);
+  std::string test = "a";
+  mycache.set("test", &test, sizeof(test));
   mycache.del("not_test");
-  REQUIRE(mycache.space_used() == 2);
+  REQUIRE(mycache.space_used() == sizeof(test));
  }

@@ -145,21 +145,6 @@ Cache::index_type Cache::space_used() const {
 	return pImpl_->space_used();
 }
 
-// int main(){
-// // std::cout << "test_init_empty" << std::endl;
-//  //  	Cache mycache(10);
-//  //  	std::cout << (mycache.space_used() == 0) << std::endl;
-
-// 	std::cout << "test_inc_memused1" << std::endl;
-// 	Cache mycache2(100);
-//   	std::string value = "marika";
-//     mycache2.set("hello", &value, sizeof(value));
-//     std::cout << "passed set, starting spaceused" << std::endl;
-//     Cache::index_type size = mycache2.space_used();
-//     std::cout << "finished space_used" << std::endl;
-//     std::cout << (size == sizeof(value)) << std::endl;
-//     return 0;
-// }
 
 
 
