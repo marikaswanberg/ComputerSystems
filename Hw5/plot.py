@@ -22,15 +22,16 @@ def read_x_coords(filename):
             x_coords.append(coord)
     return x_coords
 
-items_in_cache = read_x_coords("latency_per_num_items.csv")
-mean_latency = read_y_coords("latency_per_num_items.csv")
+reqs_per_sec = read_x_coords("sustained_throughput2.csv")
+mean_latency = read_y_coords("sustained_throughput2.csv")
 
 
 import matplotlib.pyplot as plt
-plt.title("Mean Response Time vs. Items in Cache")
+plt.title("Mean Response Time vs. Requests Per Seconds")
 
-plt.plot(items_in_cache, mean_latency)
+plt.plot(reqs_per_sec, mean_latency)
 
-plt.xlabel("Number of Items in Cache")
+plt.xlabel("Number of Requests Per Second")
 plt.ylabel("Mean Response Time (microseconds)")
+plt.xscale('log', basex=2)
 plt.show()
