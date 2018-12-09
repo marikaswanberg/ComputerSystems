@@ -41,41 +41,39 @@ double throughput_benchmark(uint64_t requests_per_sec, uint64_t num_items, Cache
 	std::vector<int> operation_vector = make_rand_operation_vect(requests_per_sec);
 	std::vector<std::string> key_vector = make_rand_key_vect(requests_per_sec, num_items);
 
-	uint64_t total_response_time = 0;
-
 	int response = 0; //fool the compiler
-	auto t1 = std::chrono::steady_clock::now(); //outer timer t1
-	for(uint64_t i = 0; i < (requests_per_sec*10); i++){
-		auto it1 = std::chrono::steady_clock::now();
+	//auto t1 = std::chrono::steady_clock::now(); //outer timer t1
+	//double total = 0.0;
+	auto it1 = std::chrono::steady_clock::now();
+	auto old_time = it1;
+	uint64_t count = 0;
+	while(count < requests_per_sec*10) {
+	auto current_time = std::chrono::steady_clock::now();
+	auto duration = std::chrono::duration <double, std::micro> (current_time - old_time).count();
+		if (duration >= micro_per_request) {
+			int randnum = operation_vector.at(count);
+			std::string randkey = key_vector.at(count);
 
-		int randnum = operation_vector.at(i);
-		std::string randkey = key_vector.at(i);
-
-		if (randnum > 4) {
-			Cache::index_type size = 0;
-			mycache.get(randkey, size);
-		} else if (randnum == 4) {
-			response = mycache.del(randkey);
-		} else {
-			response = mycache.set(randkey, &randkey, sizeof(randkey));
+			if (randnum > 4) {
+				Cache::index_type size = 0;
+				mycache.get(randkey, size);
+			} else if (randnum == 4) {
+				response = mycache.del(randkey);
+			} else {
+				response = mycache.set(randkey, &randkey, sizeof(randkey));
+			}
+			old_time = current_time;
+			++count;	
 		}
-		auto it2 = std::chrono::steady_clock::now(); //inner timer it2
 
-		auto response_time = std::chrono::duration <double, std::micro> (it2 - it1).count();
-		total_response_time += response_time;
-		double time_left = (micro_per_request - response_time);
-		//std::cout << micro_per_request << ", response_time: "<< response_time << ", time left: " << time_left << std::endl;
-		if (time_left > 0) {
-			usleep(time_left);
-		}
 	}
-	assert(response != 3);
-	auto t2 = std::chrono::steady_clock::now();//outer timer t2
-	auto total_time = std::chrono::duration <double, std::micro> (t2 - t1).count();
+	auto it3 = std::chrono::steady_clock::now();
+	auto total_time = std::chrono::duration <double, std::micro> (it3 - it1).count();
+	double average_response_time = total_time/(requests_per_sec*10.0);
+	assert(response != 3); // fool the compiler
 
 	actual_requests_per_sec = (requests_per_sec*10.0)/(total_time/1000000.0);
 
-	double average_response_time = total_response_time/(requests_per_sec*10.0);
 	return average_response_time; // average time in microseconds
 }
 
@@ -95,7 +93,7 @@ int main( int argc, char* argv[]) {
 	fill_cache(mycache, num_items);
 	double average_response_time = throughput_benchmark(reqs_per_sec, num_items, mycache, actual_requests_per_sec);
 	double milli_response_time = average_response_time/1000;
-	std::cout << num_items << ", " << milli_response_time << std::endl;
+	std::cout <<actual_requests_per_sec << ", " << milli_response_time << std::endl;
 
 
 return 0;
