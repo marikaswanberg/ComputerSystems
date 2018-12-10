@@ -93,7 +93,7 @@ int main( int argc, char* argv[]) {
 	fill_cache(mycache, num_items);
 	double average_response_time = throughput_benchmark(reqs_per_sec, num_items, mycache, actual_requests_per_sec);
 	double milli_response_time = average_response_time/1000;
-	std::cout <<actual_requests_per_sec << ", " << milli_response_time << std::endl;
+	std::cout << actual_requests_per_sec << ", " << milli_response_time << std::endl;
 
 
 return 0;
